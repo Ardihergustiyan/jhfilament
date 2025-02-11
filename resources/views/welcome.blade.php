@@ -1,0 +1,443 @@
+@include('layouts.header')
+    <!-- marquee -->
+    <div class="bg-gradient-to-r from-pink-100 via-white to-pink-100  border-gray-200 overflow-hidden">
+        <div class="whitespace-nowrap animate-marquee flex">
+          <p class="inline-block text-sm md:text-base text-gray-600 mr-[50%]">Diskon 50% untuk semua produk selama promo 10.10! | Pengiriman gratis untuk pembelian di atas Rp 500.000 | Penawaran spesial akhir bulan!</p>
+          <p class="inline-block text-sm md:text-base text-gray-600">Diskon 50% untuk semua produk selama promo 10.10! | Pengiriman gratis untuk pembelian di atas Rp 500.000 | Penawaran spesial akhir bulan!</p>
+        </div>
+    </div>
+    <!-- end marquee -->
+    {{-- navbar --}}
+    @include('components.navbar')
+    {{-- end navbar --}}
+
+    {{-- hero section --}}
+    <div class="container mx-auto p-6">
+      <div class="flex flex-wrap -mx-3">
+        <!-- Card kiri (besar) -->
+        <div class="w-full lg:w-3/5 px-3 mb-6 lg:mb-0">
+          <div class="bg-softPink p-10 rounded-lg shadow-lg h-full flex flex-col lg:flex-row">
+            <!-- Bagian kiri 60% -->
+            <div class="w-full lg:w-3/5 flex flex-col justify-center">
+              <h3 class="text-4xl font-thin font-poppinsLight mb-10 text-indigo-800">100% Original</h3>
+              <div class="text-5xl md:text-5xl font-bold mb-5 font-robotoLight">Stylish Bags by Jimshoney</div>
+              <p class="mb-8 leading-loose font-roboto text-slate-500">"Jims Honey Deserve You Better, karena setiap detail tas dirancang dengan penuh perhatian untuk memberikan kenyamanan dan gaya terbaik bagi Anda."</p>
+              <a
+                href="product"
+                class="relative inline-flex w-32 items-center rounded-lg bg-pink-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-pink-400 focus:outline-none focus:ring-4 focus:ring-pink-300 dark:bg-pink-400 dark:hover:bg-pink-500 dark:focus:ring-pink-500"
+              >
+                Selengkapnya
+              </a>
+            </div>
+            <!-- Bagian kanan 40% -->
+            <div class="w-full lg:w-2/5 flex items-center justify-center mt-6 lg:mt-0">
+              <div class="w-full max-w-xs sm:max-w-sm">
+                <img src="{{ asset('img/hero1.png') }}" alt="JimsHoney Bag" class="w-full h-auto max-h-96 object-contain" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card kanan (dua card kecil) -->
+        <div class="w-full lg:w-2/5 px-3">
+          <!-- Card kecil atas -->
+          <div class="bg-lavender p-6 rounded-lg shadow-lg mb-6 flex flex-col lg:flex-row">
+            <!-- Bagian kiri 60% -->
+            <div class="w-full lg:w-3/5 flex flex-col justify-center">
+              <h3 class="text-2xl font-thin mb-2 text-yellow-600">20% Off</h3>
+              <div class="text-2xl font-bold mt-5 mb-5 font-robotoLight">Alexandria Backpack</div>
+              <p class="mb-8 leading-loose">Tas Jimshoney diskon besar, segera beli sebelum habis!</p>
+            </div>
+            <!-- Bagian kanan 40% -->
+            <div class="w-full lg:w-2/5 flex items-center justify-center mt-6 lg:mt-0">
+              <div class="w-full max-w-xs sm:max-w-sm">
+                <img src="{{ asset('img/hero2.png') }}" alt="JimsHoney Bag" class="object-contain w-full h-auto max-w-full max-h-60" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Card kecil bawah -->
+          <div class="bg-blushNude p-6 rounded-lg shadow-lg flex flex-col lg:flex-row">
+            <div class="w-full lg:w-3/5 flex flex-col justify-center">
+                <h3 class="text-red-500 text-2xl font-thin mb-2">Up to 40% Off</h3>
+                <div class="text-2xl font-bold mt-5 mb-5 font-poppins">Join Reseller</div>
+                <p class="mb-8 leading-loose">Gabung Jadi Reseller, Raih Keuntungan Lebih Besar Bersama Toko Jims Honey!</p>
+            </div>
+            <!-- Bagian kanan -->
+            <div class="w-full lg:w-2/5 flex items-center justify-center mt-6 lg:mt-0">
+                <div class="w-full max-w-xs sm:max-w-md"> <!-- Perbesar max-w-xs menjadi max-w-md -->
+                    <img src="{{ asset('img/hero3.png') }}" alt="JimsHoney Bag" class="object-contain w-full h-auto max-w-full max-h-80" />
+                </div>
+            </div>
+        </div>
+        
+        </div>
+      </div>
+    </div>
+    {{-- end hero --}}
+
+    {{-- category --}}
+    <section class="py-12">
+      <div class="container mx-auto px-6">
+        <!-- Header with title, view all link, and navigation buttons -->
+        <div class="w-full">
+          <div class="w-full">
+            <div class="flex flex-wrap justify-between items-center mb-5">
+              <h2 class="text-3xl font-semibold text-gray-800">Category</h2>
+
+              <div class="flex items-center space-x-4">
+                <!-- "View All Categories" link -->
+                <a href="{{ route('product', array_merge(request()->query(), ['category' => 'all'])) }}" class="text-gray-600 hover:text-gray-800 transition-all duration-300 text-sm hover:underline">View All Categories →</a>
+
+                <!-- Swiper navigation buttons -->
+                <div class="flex space-x-2">
+                  <!-- Previous button (left arrow) -->
+                  <button id="prevBtn" type="button" class="text-white bg-red-300 hover:bg-red-400 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-3 inline-flex items-center justify-center">
+                    <svg class="w-4 h-4" aria-hidden="true" fill="none" viewBox="0 0 14 10">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0L5 1m-4 4L5 9" />
+                    </svg>
+                    <span class="sr-only">Previous slide</span>
+                  </button>
+
+                  <!-- Next button (right arrow) -->
+                  <button
+                    id="nextBtn"
+                    type="button"
+                    class="text-white bg-red-300 hover:bg-red-400 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-3 inline-flex items-center justify-center dark:bg-red-400 dark:hover:bg-red-500 dark:focus:ring-red-800"
+                  >
+                    <svg class="w-4 h-4" aria-hidden="true" fill="none" viewBox="0 0 14 10">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
+                    </svg>
+                    <span class="sr-only">Next slide</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Swiper container -->
+        <div class="swiper-container overflow-hidden">
+          <!-- Added overflow-hidden here -->
+          <div class="swiper-wrapper">
+            <!-- Card 1 -->
+            <a
+              href="{{ route('product', ['categories' => 'backpack', 'category' => 'all']) }}"
+              class="swiper-slide mb-2 mt-3 bg-white hover:cursor-pointer hover:shadow-lg hover:-translate-y-2 transform transition-all duration-300 rounded-lg overflow-hidden h-44 flex flex-col items-center justify-center"
+            >
+              <img src="{{ asset('img/svg/backpack.svg') }}" alt="Bag Icon" class="w-24 h-24" />
+              <span class="font-arial font-semibold">Backpack</span>
+            </a>
+            <!-- Card 2 -->
+            <a href="{{ route('product', ['categories' => 'bag', 'category' => 'all']) }}" class="swiper-slide mt-3 bg-white hover:cursor-pointer hover:shadow-lg hover:-translate-y-2 transform transition-all duration-300 rounded-lg overflow-hidden h-44 flex flex-col items-center justify-center">
+              <img src="{{ asset('img/svg/bag.svg') }}" alt="Bag Icon" class="w-24 h-24" />
+              <span class="font-arial font-semibold">Bag</span>
+            </a>
+            <!-- Card 3 -->
+            <a href="{{ route('product', ['categories' => 'wallet', 'category' => 'all']) }}" class="swiper-slide mt-3 bg-white hover:cursor-pointer hover:shadow-lg hover:-translate-y-2 transform transition-all duration-300 rounded-lg overflow-hidden h-44 flex flex-col items-center justify-center">
+              <img src="{{ asset('img/svg/wallet.svg') }}" alt="Bag Icon" class="w-24 h-24" />
+              <span class="font-arial font-semibold mt-2">Wallet</span>
+            </a>
+            <!-- Card 4 -->
+            <a href="{{ route('product', ['categories' => 'mini-bag', 'category' => 'all']) }}" class="swiper-slide mt-3 bg-white hover:cursor-pointer hover:shadow-lg hover:-translate-y-2 transform transition-all duration-300 rounded-lg overflow-hidden h-44 flex flex-col items-center justify-center">
+              <img src="{{ asset('img/svg/minibag.svg') }}" alt="Bag Icon" class="w-24 h-24" />
+              <span class="font-arial font-semibold mt-2">Mini Bag</span>
+            </a>
+            <!-- Card 5 -->
+            <a href="{{ route('product', ['categories' => 'watch', 'category' => 'all']) }}" class="swiper-slide mt-3 bg-white hover:cursor-pointer hover:shadow-lg hover:-translate-y-2 transform transition-all duration-300 rounded-lg overflow-hidden h-44 flex flex-col items-center justify-center">
+              <img src="{{ asset('img/svg/watch.svg') }}" alt="Bag Icon" class="w-24 h-24" />
+              <span class="font-arial font-semibold mt-2">Watch</span>
+            </a>
+            <!-- Card 6 -->
+            <a href="{{ route('product', ['categories' => 'powerbank', 'category' => 'all']) }}" class="swiper-slide mt-3 bg-white hover:cursor-pointer hover:shadow-lg hover:-translate-y-2 transform transition-all duration-300 rounded-lg overflow-hidden h-44 flex flex-col items-center justify-center">
+              <img src="{{ asset('img/svg/powerbank.svg') }}" alt="Bag Icon" class="w-24 h-24" />
+              <span class="font-arial font-semibold mt-2">Powerbank</span>
+            </a>
+            <!-- Card 7 -->
+            <a href="{{ route('product', ['categories' => 'highheels', 'category' => 'all']) }}" class="swiper-slide mt-3 bg-white hover:cursor-pointer hover:shadow-lg hover:-translate-y-2 transform transition-all duration-300 rounded-lg overflow-hidden h-44 flex flex-col items-center justify-center">
+              <img src="{{ asset('img/svg/higheels.svg') }}" alt="Bag Icon" class="w-24 h-24" />
+              <span class="font-arial font-semibold mt-2">Highheels</span>
+            </a>
+            <!-- Card 8 -->
+            <a href="{{ route('product', ['categories' => 'tumbler', 'category' => 'all']) }}" class="swiper-slide mt-3 bg-white hover:cursor-pointer hover:shadow-lg hover:-translate-y-2 transform transition-all duration-300 rounded-lg overflow-hidden h-44 flex flex-col items-center justify-center">
+              <img src="{{ asset('img/svg/tumbler.svg') }}" alt="Bag Icon" class="w-24 h-24" />
+              <span class="font-arial font-semibold mt-2">Tumbler</span>
+            </a>
+            <!-- Card 9 -->
+            <a href="{{ route('product', ['categories' => 'packaging', 'category' => 'all']) }}" class="swiper-slide mt-3 bg-white hover:cursor-pointer hover:shadow-lg hover:-translate-y-2 transform transition-all duration-300 rounded-lg overflow-hidden h-44 flex flex-col items-center justify-center">
+              <img src="{{ asset('img/svg/packaging.svg') }}" alt="Bag Icon" class="w-24 h-24" />
+              <span class="font-arial font-semibold mt-2">Packaging</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+    {{-- end category --}}
+
+    {{-- new arrival --}}
+    <section class="py-12">
+      <div class="container mx-auto px-6">
+        <!-- Header with title, view all link, and navigation buttons -->
+        <div class="w-full">
+          <div class="w-full">
+            <div class="flex flex-wrap justify-between items-center mb-5">
+              <h2 class="text-3xl font-semibold text-gray-800">New Arrival</h2>
+
+              <div class="flex items-center space-x-4">
+                <!-- "View All Categories" link -->
+                <a href="{{ route('product', array_merge(request()->query(), ['filter' => 'terbaru'])) }}" class="text-gray-600 hover:text-gray-800 transition-all duration-300 text-sm hover:underline">View All Product →</a>
+
+                <!-- Swiper navigation buttons -->
+                <div class="flex space-x-2">
+                  <!-- Previous button (left arrow) -->
+                  <button id="prevBtn2" type="button" class="text-white bg-red-300 hover:bg-red-400 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-3 inline-flex items-center justify-center">
+                    <svg class="w-4 h-4" aria-hidden="true" fill="none" viewBox="0 0 14 10">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0L5 1m-4 4L5 9" />
+                    </svg>
+                    <span class="sr-only">Previous slide</span>
+                  </button>
+
+                  <!-- Next button (right arrow) -->
+                  <button
+                    id="nextBtn2"
+                    type="button"
+                    class="text-white bg-red-300 hover:bg-red-400 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-3 inline-flex items-center justify-center dark:bg-red-400 dark:hover:bg-red-500 dark:focus:ring-red-800"
+                  >
+                    <svg class="w-4 h-4" aria-hidden="true" fill="none" viewBox="0 0 14 10">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
+                    </svg>
+                    <span class="sr-only">Next slide</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Swiper container -->
+        <div class="swiper-container2 overflow-hidden w-full">
+          <!-- Added overflow-hidden here -->
+          <div class="swiper-wrapper">
+            @foreach ($newArrivals as $product)
+              @include('components.card2', ['product' => $product])
+            @endforeach
+          </div>
+        </div>
+        <!-- Swiper container end -->
+      </div>
+    </section>
+    {{-- end new arrival --}}
+
+    {{-- product terlaris --}}
+    <div class="container mx-auto my-6 px-6">
+      <nav class="flex justify-between items-center border-b border-gray-200">
+        <!-- Left Tab -->
+        <h4 class="text-gray-500 text-sm font-semibold uppercase">Product Terlaris</h4>
+        <!-- All Tab -->
+        <div class="flex space-x-4">
+          <button onclick="showProductTab('all')" id="tab-all" class="text-gray-500 text-sm font-semibold uppercase pb-2 border-b-2 border-transparent hover:text-pink-300" role="tab">All</button>
+
+          <!-- Fruits & Veges Tab -->
+          <button onclick="showProductTab('wallet')" id="tab-wallet" class="text-pink-300 text-sm font-semibold uppercase pb-2 border-b-2 border-pink-300" role="tab">wallet</button>
+
+          <!-- Juices Tab -->
+          <button onclick="showProductTab('bag')" id="tab-bag" class="text-gray-500 text-sm font-semibold uppercase pb-2 border-b-2 border-transparent hover:text-pink-300" role="tab">Bag</button>
+        </div>
+      </nav>
+
+        <div id="content-all" class="tab-content mt-4 mb-4 grid gap-4 sm:grid-cols-3 md:mb-8 lg:grid-cols-4 xl:grid-cols-5">
+          @foreach ($topProductsAll as $product)
+            @include('components.card', ['product' => $product])
+          @endforeach
+          {{-- @foreach ($topProductsAll as $product)
+          <div>
+              <img src="{{ asset('storage/' . $product->main_image) }}" alt="{{ $product->name }}" />
+              <h3>{{ $product->name }}</h3>
+              <p>Harga: Rp{{ number_format($product->het_price) }}</p>
+              <p>Terjual: {{ $product->total_quantity }} item</p>
+              <p>Rating: {{ number_format($product->average_rating, 1) }} ({{ $product->total_reviews }} ulasan)</p>
+          </div>
+          @endforeach --}}
+        </div>
+        <div id="content-wallet" class="tab-content mt-4 mb-4 grid gap-4 sm:grid-cols-3 md:mb-8 lg:grid-cols-4 xl:grid-cols-5">
+          {{-- @foreach ($topProductsWallet as $product)
+          <div>
+              <img src="{{ asset('storage/' . $product->main_image) }}" alt="{{ $product->name }}" />
+              <h3>{{ $product->name }}</h3>
+              <p>Harga: Rp{{ number_format($product->het_price) }}</p>
+              <p>Terjual: {{ $product->total_quantity }} item</p>
+              <p>Rating: {{ number_format($product->average_rating, 1) }} ({{ $product->total_reviews }} ulasan)</p>
+          </div>
+          @endforeach --}}
+          @foreach ($topProductsWallet as $product)
+            @include('components.card', ['product' => $product])
+          @endforeach
+        </div>
+        <div id="content-bag" class="tab-content mt-4 mb-4 grid gap-4 sm:grid-cols-3 md:mb-8 lg:grid-cols-4 xl:grid-cols-5">
+          {{-- @foreach ($topProductsBag as $product)
+          <div>
+      
+              <img src="{{ asset('storage/' . $product->main_image) }}" alt="{{ $product->name }}" />
+              <h3>{{ $product->name }}</h3>
+              <p>Harga: Rp{{ number_format($product->het_price) }}</p>
+              <p>Terjual: {{ $product->total_quantity }} item</p>
+              <p>Rating: {{ number_format($product->average_rating, 1) }} ({{ $product->total_reviews }} ulasan)</p>
+          </div>
+          @endforeach --}}
+          @foreach ($topProductsBag as $product)
+            @include('components.card', ['product' => $product])
+          @endforeach
+        </div>
+      </div>
+    </div>
+    {{-- end product terlaris --}}
+
+    {{-- promosi --}}
+    <section class="container mx-auto p-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Banner 1 -->
+        <div class="flex flex-col md:flex-row bg-pink-100 rounded-lg p-6 items-center">
+          <div class="flex-1 text-center md:text-left">
+            <p class="text-yellow-600 font-semibold text-lg">Up to 25% Off</p>
+            <h2 class="text-2xl font-bold text-gray-800">Alexandria Bag</h2>
+            <p class="text-gray-600 mt-2">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Debitis, minus..</p>
+            <a
+              href="#"
+              class="mt-4 relative inline-flex w-32 items-center justify-center rounded-lg bg-pink-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-pink-400 focus:outline-none focus:ring-4 focus:ring-pink-300 dark:bg-pink-400 dark:hover:bg-pink-500 dark:focus:ring-pink-500 transition duration-300 ease-in-out"
+              aria-label="Show products now"
+            >
+              SHOW NOW
+            </a>
+          </div>
+          <div class="mt-4 md:mt-0 md:ml-4">
+            <img src="img/kindybag.jpg" alt="Luxa Dark Chocolate" class="w-40 h-40 object-cover rounded-md shadow-md" />
+          </div>
+        </div>
+
+        <!-- Banner 2 -->
+        <div class="flex flex-col md:flex-row bg-blue-100 rounded-lg p-6 items-center">
+          <div class="flex-1 text-center md:text-left">
+            <p class="text-yellow-600 font-semibold text-lg">Up to 25% Off</p>
+            <h2 class="text-2xl font-bold text-gray-800">MONIC BAG</h2>
+            <p class="text-gray-600 mt-2">Lorem ipsum dolor sit amet consectetur adipisicing.</p>
+            <a
+              href="#"
+              class="mt-4 relative inline-flex w-32 items-center justify-center rounded-lg bg-pink-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-pink-400 focus:outline-none focus:ring-4 focus:ring-pink-300 dark:bg-pink-400 dark:hover:bg-pink-500 dark:focus:ring-pink-500 transition duration-300 ease-in-out"
+              aria-label="Show products now"
+            >
+              SHOW NOW
+            </a>
+          </div>
+          <div class="mt-4 md:mt-0 md:ml-4">
+            <img src="img/monicbag.jpg" alt="Creamy Muffins" class="w-40 h-40 object-cover rounded-md shadow-md" />
+          </div>
+        </div>
+      </div>
+    </section>
+    {{-- end promosi --}}
+
+    {{-- Trending --}}
+    <section class="py-12">
+      <div class="container mx-auto px-6">
+        <!-- Header with title, view all link, and navigation buttons -->
+        <div class="w-full">
+          <div class="w-full">
+            <div class="flex flex-wrap justify-between items-center mb-5">
+              <h2 class="text-3xl font-semibold text-gray-800">Trending</h2>
+
+              <div class="flex items-center space-x-4">
+                <!-- "View All Categories" link -->
+                <a href="{{ route('product', array_merge(request()->query(), ['filter' => 'trending'])) }}" class="text-gray-600 hover:text-gray-800 transition-all duration-300 text-sm hover:underline">View All Product</a>
+
+                <!-- Swiper navigation buttons -->
+                <div class="flex space-x-2">
+                  <!-- Previous button (left arrow) -->
+                  <button id="prevBtn3" type="button" class="text-white bg-red-300 hover:bg-red-400 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-3 inline-flex items-center justify-center">
+                    <svg class="w-4 h-4" aria-hidden="true" fill="none" viewBox="0 0 14 10">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0L5 1m-4 4L5 9" />
+                    </svg>
+                    <span class="sr-only">Previous slide</span>
+                  </button>
+
+                  <!-- Next button (right arrow) -->
+                  <button
+                    id="nextBtn3"
+                    type="button"
+                    class="text-white bg-red-300 hover:bg-red-400 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-3 inline-flex items-center justify-center dark:bg-red-400 dark:hover:bg-red-500 dark:focus:ring-red-800"
+                  >
+                    <svg class="w-4 h-4" aria-hidden="true" fill="none" viewBox="0 0 14 10">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
+                    </svg>
+                    <span class="sr-only">Next slide</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Swiper container -->
+        <div class="swiper-container3 overflow-hidden w-full">
+          <!-- Added overflow-hidden here -->
+          <div class="swiper-wrapper">
+            {{-- @foreach ($mostReviewedProducts as $product) 
+          <div>
+      
+              <img src="{{ asset('storage/' . $product->main_image) }}" alt="{{ $product->name }}" />
+              <h3>{{ $product->name }}</h3>
+              <p>Harga: Rp{{ number_format($product->het_price) }}</p>
+              <p>Terjual: {{ $product->total_quantity }} item</p>
+              <p>Rating: {{ number_format($product->average_rating, 1) }} ({{ $product->total_reviews }} ulasan)</p>
+          </div>
+          @endforeach --}}
+            @foreach($mostReviewedProducts as $product)
+              @include('components.card', ['product' => $product])
+            @endforeach
+          </div>
+        </div>
+        <!-- Swiper container end -->
+      </div>
+    </section>
+    {{-- end Trending --}}
+
+    {{-- banner --}}
+    <div class="container mx-auto p-6">
+      <div class="bg-blue-100 rounded-3xl md:flex md:items-center md:justify-between p-10 lg:p-40 shadow-lg">
+        <!-- Left Side - Discount Text -->
+        <div class="md:w-1/2 text-center md:text-left mb-20 md:mb-0 md:px-10">
+          <h2 class="text-5xl font-bold text-gray-800 tracking-[0.09em]">
+            Get <span class="text-pink-500">25% Discount</span>
+            <p class="text-5xl font-bold text-gray-800 tracking-[0.09em] pt-2">on your first</p>
+            <p class="pt-2">purchase</p>
+          </h2>
+          <p class="text-gray-600 mt-6 text-xl">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Dictumst amet, metus, sit massa posuere maecenas. At tellus ut nunc amet vel egestas.</p>
+        </div>
+
+        <!-- Right Side - Form -->
+        <div class="md:w-1/2 bg-transparent rounded-lg max-w-md mx-auto mb-10 md:mb-0">
+          <form action="#" method="POST" class="space-y-5">
+            <div>
+              <label for="name" class="block mb-3 text-gray-700">Name</label>
+              <input type="text" id="name" name="name" placeholder="Name" class="w-full px-4 py-2 border border-blue-100 rounded-md focus:border-none focus:outline-none focus:ring-2 focus:ring-pink-200" />
+            </div>
+            <div>
+              <label for="email" class="block mb-3 text-gray-700">Email</label>
+              <input type="email" id="email" name="email" placeholder="abc@mail.com" class="w-full px-4 py-2 border border-blue-100 rounded-md focus:border-none focus:outline-none focus:ring-2 focus:ring-pink-200" />
+            </div>
+
+            <div class="flex items-center">
+              <input type="checkbox" id="subscribe" name="subscribe" class="text-pink-200 focus:ring-pink-200 border-gray-300 rounded" />
+              <label for="subscribe" class="ml-2 text-gray-600">Subscribe to the newsletter</label>
+            </div>
+            <div>
+              <button type="submit" class="w-full px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition duration-300">Submit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    {{-- end banner  --}}
+
+    
+@include('components.features')
+@include('layouts.footer')
