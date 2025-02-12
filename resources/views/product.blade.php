@@ -183,7 +183,17 @@
                         <div class="mt-4 flex items-center justify-between gap-1">
                             <div>
                                 <p class="text-sm text-gray-500 dark:text-gray-400"><del>Rp{{ number_format($product->base_price, 0, ',', '.') }},00</p>
-                                <p class="text-lg font-extrabold leading-tight text-gray-900 dark:text-white">Rp{{ number_format($product->het_price, 0, ',', '.') }},00</p>
+                                  @auth
+                                      <p id="userRole">
+                                          @if (Auth::user()->hasRole('Reseller'))
+                                              Harga Reseller: {{ $product->final_price }}
+                                          @else
+                                              Harga Normal: {{ $product->het_price }}
+                                          @endif
+                                      </p>
+                                  @else
+                                      <p>Harga Normal: {{ $product->het_price }}</p>
+                                  @endauth
                             </div>
                             
                             {{-- Jika sudah login --}}
@@ -201,17 +211,7 @@
                                       Add to cart
                                   </button>
                               @else
-                                  {{-- <button 
-                                      type="button" 
-                                      class="inline-flex items-center rounded-lg bg-pink-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-pink-400 focus:outline-none focus:ring-4 focus:ring-pink-200 dark:bg-pink-400 dark:hover:bg-pink-500 dark:focus:ring-pink-500" 
-                                      data-modal-target="popup-modal-{{ $product->id }}" 
-                                      data-modal-toggle="popup-modal-{{ $product->id }}"
-                                  >
-                                      <svg class="-ms-2 me-2 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h1.5L8 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm.75-3H7.5M11 7H6.312M17 4v6m-3-3h6" />
-                                      </svg>
-                                      Add to cart
-                                  </button> --}}
+                                  
                                   <button 
                                       type="button" 
                                       class="inline-flex items-center rounded-lg bg-pink-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-pink-400 focus:outline-none focus:ring-4 focus:ring-pink-200 dark:bg-pink-400 dark:hover:bg-pink-500 dark:focus:ring-pink-500"
@@ -232,33 +232,6 @@
                                     Add to cart
                                 </a>
                             @endif
-                            
-                            {{-- <div id="popup-modal-{{ $product->id }}" tabindex="-1" class="hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-gray-800 bg-opacity-50">
-                                <div class="relative p-4 w-full max-w-md max-h-full bg-white rounded-lg shadow dark:bg-gray-700">
-                                    <!-- Button Close -->
-                                    <button 
-                                        type="button" 
-                                        class="absolute top-3 right-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                                        data-modal-hide="popup-modal-{{ $product->id }}"
-                                      >
-                                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                                        </svg>
-                                        <span class="sr-only">Close modal</span>
-                                    </button>
-                                    <div class="p-4 md:p-5 text-center">
-                                        <svg class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                        </svg>
-                                        <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Anda belum menentukan warna produk, ke halaman detail untuk memilih</h3>
-                            
-                                        <a data-modal-hide="popup-modal-{{ $product->id }}" href="{{ route('product.show', $product->slug) }}" class="text-white bg-pink-400 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-pink-400 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">Lihat Detail</a>
-                            
-                                        <button data-modal-hide="popup-modal-{{ $product->id }}" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-pink-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Tutup</button>
-                                    </div>
-                                </div>
-                            </div> --}}
-
                             <!-- Modal Container -->
                             <div id="customModal" class="hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-gray-800 bg-opacity-50">
                               <div class="relative p-4 w-full max-w-md max-h-full bg-white rounded-lg shadow-lg dark:bg-gray-800">

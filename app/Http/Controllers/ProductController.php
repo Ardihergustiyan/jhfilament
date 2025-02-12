@@ -14,17 +14,22 @@ class ProductController extends Controller
         // Ambil parameter rentang harga dari request
         $minPrice = $request->query('min_price', 10000); // Default minimum price
         $maxPrice = $request->query('max_price', 1000000); // Default maximum price
-    
-        // Query Produk
+        
+        $resellerLevelId = auth()->user()->reseller_level_id ?? null;
         // Query Produk
         $query = Product::select(
             'products.*',
             'aggregated_data.total_quantity',
-            'images.main_image', // Gambar dari varian
-            'products.image as product_image', // Gambar dari produk
+            'images.main_image',
+            'products.image as product_image',
             'ratings.average_rating',
-            'review_counts.total_reviews'
+            'review_counts.total_reviews',
+            DB::raw('IFNULL(product_prices.price, products.het_price) as final_price') // Gunakan harga reseller atau het_price
         )
+        ->leftJoin('product_prices', function ($join) use ($resellerLevelId) {
+            $join->on('products.id', '=', 'product_prices.product_id')
+                 ->where('product_prices.reseller_level_id', '=', $resellerLevelId);
+        })
         ->leftJoinSub(
             DB::table('order_items')
                 ->select('product_id', DB::raw('SUM(quantity) as total_quantity'))
@@ -65,7 +70,11 @@ class ProductController extends Controller
         ->join('general_categories', 'categories.general_category_id', '=', 'general_categories.id');
         
         // Filter rentang harga
-        $query->whereBetween('products.het_price', [$minPrice, $maxPrice]);
+        // $query->whereBetween('products.het_price', [$minPrice, $maxPrice]);
+        $query->whereBetween(
+            DB::raw('IFNULL(product_prices.price, products.het_price)'), 
+            [$minPrice, $maxPrice]
+        );
     
         // Filter kategori dan lainnya (tetap sama)
         $category = $request->query('category', 'all');
@@ -107,13 +116,14 @@ class ProductController extends Controller
         } elseif ($filter === 'terlaris') {
             $query->orderBy('aggregated_data.total_quantity', 'desc');
         } elseif ($filter === 'termahal') {
-            $query->orderBy('products.het_price', 'desc');
+            $query->orderBy('final_price', 'desc');
         } elseif ($filter === 'termurah') {
-            $query->orderBy('products.het_price', 'asc');
+            $query->orderBy('final_price', 'asc');
         }
+        
     
         // Pagination
-        $allProducts = $query->paginate(4, ['*'], 'page', $request->query('page', 1));
+        $allProducts = $query->paginate(20, ['*'], 'page', $request->query('page', 1));
     
         // Ambil tipe produk untuk filter checkbox
         $productTypes = DB::table('categories')
@@ -154,12 +164,18 @@ class ProductController extends Controller
     public function show($slug, Request $request)
     {
         $starFilter = $request->query('stars', null);
-    
+
+        // Ambil level reseller user (jika ada)
+        $resellerLevelId = auth()->check() && auth()->user()->hasRole('Reseller') 
+            ? auth()->user()->reseller_level_id 
+            : null;
+
         // Ambil produk berdasarkan slug
         $product = Product::select(
             'products.*',
             'ratings.average_rating',
-            'review_counts.total_reviews'
+            'review_counts.total_reviews',
+            DB::raw('IFNULL(product_prices.price, products.het_price) as final_price') // Tambahkan kolom final_price
         )
         ->leftJoinSub(
             DB::table('product_reviews')
@@ -179,14 +195,17 @@ class ProductController extends Controller
             '=',
             'review_counts.product_id'
         )
+        ->leftJoin('product_prices', function ($join) use ($resellerLevelId) {
+            $join->on('products.id', '=', 'product_prices.product_id')
+                ->where('product_prices.reseller_level_id', '=', $resellerLevelId);
+        })
         ->where('products.slug', $slug)
         ->firstOrFail();
-    
+
         // Ambil gambar utama (gambar pertama dari kolom image)
         $productImages = is_array($product->image) ? $product->image : json_decode($product->image, true); // Pastikan data berupa array
         $mainImage = $productImages[0] ?? null; // Gunakan gambar pertama sebagai gambar utama
 
-    
         // Ambil varian produk beserta gambar
         $variants = DB::table('product_variants')
             ->select('id', 'color', 'image', 'stock')
@@ -196,7 +215,7 @@ class ProductController extends Controller
                 $variant->images = json_decode($variant->image, true); // Decode JSON gambar varian
                 return $variant;
             });
-    
+
         // Ambil ulasan terkait produk
         $reviewsQuery = DB::table('product_reviews')
             ->join('users', 'product_reviews.user_id', '=', 'users.id')
@@ -207,13 +226,13 @@ class ProductController extends Controller
                 'users.image as profile_image'
             )
             ->where('product_reviews.product_id', $product->id);
-    
+
         if ($starFilter) {
             $reviewsQuery->where('product_reviews.rating', $starFilter);
         }
-    
+
         $reviews = $reviewsQuery->get();
-    
+
         return view('product-detail', [
             'product' => $product,
             'mainImage' => $mainImage,         // Gambar utama
@@ -222,7 +241,8 @@ class ProductController extends Controller
             'reviews' => $reviews,
         ]);
     }
-    
+
+
     public function search(Request $request)
     {
         $searchQuery = $request->input('query', '');
@@ -233,6 +253,11 @@ class ProductController extends Controller
                 'data' => [],
             ]);
         }
+
+        // Ambil level reseller user (jika ada)
+        $resellerLevelId = auth()->check() && auth()->user()->hasRole('Reseller') 
+            ? auth()->user()->reseller_level_id 
+            : null;
 
         // Ambil 5 produk terlaris yang sesuai dengan pencarian
         $products = Product::where('name', 'LIKE', "%{$searchQuery}%")
@@ -245,8 +270,19 @@ class ProductController extends Controller
                 '=',
                 'aggregated_data.product_id'
             )
+            ->leftJoin('product_prices', function ($join) use ($resellerLevelId) {
+                $join->on('products.id', '=', 'product_prices.product_id')
+                    ->where('product_prices.reseller_level_id', '=', $resellerLevelId);
+            })
             ->orderBy('aggregated_data.total_quantity', 'desc') // Urutkan berdasarkan penjualan terbanyak
-            ->select('products.id', 'products.name', 'products.slug', 'products.base_price', 'products.het_price')
+            ->select(
+                'products.id', 
+                'products.name', 
+                'products.slug', 
+                'products.base_price', 
+                'products.het_price',
+                DB::raw('IFNULL(product_prices.price, products.het_price) as final_price') // Tambahkan kolom final_price
+            )
             ->take(3) // Batasi hasil maksimal 5
             ->get();
 
