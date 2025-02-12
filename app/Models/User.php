@@ -94,5 +94,10 @@ class User extends Authenticatable implements  HasName
         return $this->belongsTo(ResellerLevel::class, 'reseller_level_id');
     }
 
+    public function isReseller()
+    {
+        return $this->reseller_level_id !== null; // Cek apakah user punya level reseller
+    }
+
     
 }
