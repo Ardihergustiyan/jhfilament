@@ -146,32 +146,33 @@ function formatRupiah(number) {
 }
 
 // Fungsi untuk memperbarui hasil pencarian
+
 function updateSearchResults(data, query) {
-    searchResults.innerHTML = ''; // Kosongkan hasil sebelumnya
+  searchResults.innerHTML = ''; // Kosongkan hasil sebelumnya
 
-    if (data.status === 'success' && data.data.length > 0) {
-        data.data.forEach(product => {
-            const highlightedName = product.name.replace(
-                new RegExp(query, 'gi'),
-                match => `<strong class="text-pink-600">${match}</strong>`
-            );
+  if (data.status === 'success' && data.data.length > 0) {
+      data.data.forEach(product => {
+          const highlightedName = product.name.replace(
+              new RegExp(query, 'gi'),
+              match => `<strong class="text-pink-600">${match}</strong>`
+          );
 
-            const productHTML = `
-                <li class="flex justify-between items-center p-2 hover:bg-gray-100 rounded">
-                    <a href="/product-detail/${product.slug}" class="block w-full">
-                        <div>
-                            <p class="font-semibold text-gray-800">${highlightedName}</p>
-                            <p class="text-sm text-gray-500 line-through">${formatRupiah(product.base_price)}</p>
-                            <p class="text-sm text-pink-600">${formatRupiah(product.het_price)}</p>
-                        </div>
-                    </a>
-                </li>
-            `;
-            searchResults.innerHTML += productHTML;
-        });
-    } else {
-        searchResults.innerHTML = '<p class="text-gray-500">Produk tidak ditemukan</p>';
-    }
+          const productHTML = `
+              <li class="flex justify-between items-center p-2 hover:bg-gray-100 rounded">
+                  <a href="/product-detail/${product.slug}" class="block w-full">
+                      <div>
+                          <p class="font-semibold text-gray-800">${highlightedName}</p>
+                          <p class="text-sm text-gray-500 line-through">${formatRupiah(product.base_price)}</p>
+                          <p class="text-sm text-pink-600">${formatRupiah(product.final_price)}</p>
+                      </div>
+                  </a>
+              </li>
+          `;
+          searchResults.innerHTML += productHTML;
+      });
+  } else {
+      searchResults.innerHTML = '<p class="text-gray-500">Produk tidak ditemukan</p>';
+  }
 }
 
 // Fungsi untuk memanggil API dan memperbarui hasil pencarian
