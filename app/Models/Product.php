@@ -32,19 +32,18 @@ class Product extends Model
         'image' => 'array',
     ];
 
-
     public function scopeTopSelling($query, $categoryName = null)
     {
         return $query->select(
             'products.*', 
             'aggregated_data.total_quantity', 
             'images.main_image',
+            'products.image as product_image', // Ambil gambar dari produk
             'ratings.average_rating',
             'review_counts.total_reviews'
         )
-        ->join('categories', 'products.category_id', '=', 'categories.id') // Join dengan categories
+        ->join('categories', 'products.category_id', '=', 'categories.id')
         ->leftJoinSub(
-            // Subquery untuk menghitung total_quantity
             DB::table('order_items')
                 ->select('product_id', DB::raw('SUM(quantity) as total_quantity'))
                 ->groupBy('product_id'),
@@ -54,7 +53,6 @@ class Product extends Model
             'aggregated_data.product_id'
         )
         ->leftJoinSub(
-            // Subquery untuk mengambil main_image
             DB::table('product_variants')
                 ->select('product_id', DB::raw('MAX(JSON_UNQUOTE(JSON_EXTRACT(image, "$[0]"))) as main_image'))
                 ->groupBy('product_id'),
@@ -64,7 +62,6 @@ class Product extends Model
             'images.product_id'
         )
         ->leftJoinSub(
-            // Subquery untuk menghitung rata-rata rating
             DB::table('product_reviews')
                 ->select('product_id', DB::raw('AVG(rating) as average_rating'))
                 ->groupBy('product_id'),
@@ -74,7 +71,6 @@ class Product extends Model
             'ratings.product_id'
         )
         ->leftJoinSub(
-            // Subquery untuk menghitung jumlah ulasan
             DB::table('product_reviews')
                 ->select('product_id', DB::raw('COUNT(id) as total_reviews'))
                 ->groupBy('product_id'),
@@ -84,10 +80,10 @@ class Product extends Model
             'review_counts.product_id'
         )
         ->when($categoryName, function ($q) use ($categoryName) {
-            $q->where('categories.name', $categoryName); // Filter berdasarkan nama kategori
+            $q->where('categories.name', $categoryName);
         })
-        ->orderByDesc('aggregated_data.total_quantity') // Urutkan berdasarkan total_quantity
-        ->take(10); // Ambil 5 produk terlaris
+        ->orderByDesc('aggregated_data.total_quantity')
+        ->take(10);
     }
     
     public function scopeMostReviewed($query, $categoryName = null)
