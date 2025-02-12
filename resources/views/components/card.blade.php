@@ -1,7 +1,29 @@
 <div class="swiper-slide rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
   <div class="h-40 w-full">
     <a href="{{ route('product.show', $product->slug) }}">
-      <img class="mx-auto h-full" src="{{ asset('storage/' . $product->main_image) }}" alt="{{ $product->name }}" />
+      {{-- <img class="mx-auto h-full" src="{{ asset('storage/' . $product->main_image) }}" alt="{{ $product->name }}" /> --}}
+        @if($product->main_image)
+            <!-- Jika ada gambar dari varian -->
+            <img class="mx-auto h-full" 
+                src="{{ asset('storage/' . $product->main_image) }}" 
+                alt="{{ $product->name }}" />
+        @else
+            <!-- Jika tidak ada gambar dari varian, gunakan gambar dari produk -->
+            @php
+                $productImages = json_decode($product->product_image, true);
+                $mainImage = $productImages[0] ?? null;
+            @endphp
+            @if($mainImage)
+                <img class="mx-auto h-full" 
+                    src="{{ asset('storage/' . $mainImage) }}" 
+                    alt="{{ $product->name }}" />
+            @else
+                <!-- Jika tidak ada gambar sama sekali, gunakan gambar default -->
+                <img class="mx-auto h-full" 
+                    src="{{ asset('path/to/default/image.jpg') }}" 
+                    alt="{{ $product->name }}" />
+            @endif
+        @endif
     </a>
   </div>
   <div class="pt-4">
@@ -37,7 +59,18 @@
     <div class="mt-4 flex items-center justify-between gap-1">
       <div>
         <p class="text-sm text-gray-500 dark:text-gray-400"><del>Rp{{ number_format($product->base_price, 0, ',', '.') }},00</del></p>
-        <p class="text-lg font-extrabold leading-tight text-gray-900 dark:text-white">Rp{{ number_format($product->het_price, 0, ',', '.') }},00</p>
+        {{-- <p class="text-lg font-extrabold leading-tight text-gray-900 dark:text-white">Rp{{ number_format($product->het_price, 0, ',', '.') }},00</p> --}}
+        @auth
+            <p id="userRole">
+                @if (Auth::user()->hasRole('Reseller'))
+                    Harga Reseller: {{ $product->final_price }}
+                @else
+                    Harga Normal: {{ $product->het_price }}
+                @endif
+            </p>
+        @else
+            <p>Harga Normal: {{ $product->het_price }}</p>
+        @endauth
       </div>
       @if (Auth::check())
           <button
@@ -67,25 +100,6 @@
 </div>
 
 <script>
-  // function addToCart(productId) {
-  //     fetch('{{ route('cart.add') }}', {
-  //         method: 'POST',
-  //         headers: {
-  //             'Content-Type': 'application/json',
-  //             'X-CSRF-TOKEN': '{{ csrf_token() }}',
-  //         },
-  //         body: JSON.stringify({
-  //             product_id: productId,
-  //             quantity: 1 // Tambahkan nilai default quantity
-  //         }),
-  //     })
-  //     .then(response => response.json())
-  //     .then(data => {
-  //         alert(data.message); // Tampilkan notifikasi
-  //         updateCartItemCount(); // Perbarui jumlah item di ikon cart
-  //     })
-  //     .catch(error => console.error('Error:', error));
-  // }
   function addToCart(productId) {
       // Ambil tombol yang diklik
       const addToCartButton = document.querySelector(`button[data-product-id="${productId}"]`);
