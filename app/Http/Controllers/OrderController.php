@@ -13,10 +13,10 @@ use Illuminate\Support\Facades\Session;
 
 class OrderController extends Controller
 {
-   public function thankyou($order_id)
+    public function thankyou($order_id)
     {
         // Ambil data order beserta relasinya
-        $order = Order::with(['user', 'orderItems.product', 'payment', 'status'])
+        $order = Order::with(['user', 'orderItems.product', 'orderItems.productVariant', 'payment', 'status'])
                     ->find($order_id);
 
         // Jika order tidak ditemukan, kembalikan error 404
@@ -24,9 +24,18 @@ class OrderController extends Controller
             abort(404, 'Order not found');
         }
 
-        // Kirim order ke view
-        return view('thankyou', compact('order'));
+        // Hitung ulang subtotal, voucherAmount, dan total
+        $subtotal = $order->orderItems->sum(function ($item) {
+            return ($item->unit_price ?? 0) * ($item->quantity ?? 0);
+        });
+
+        $voucherAmount = $order->discount_amount ?? 0;
+        $total = $subtotal - $voucherAmount;
+
+        // Kirim data ke view
+        return view('thankyou', compact('order', 'subtotal', 'voucherAmount', 'total'));
     }
+
     public function success(Request $request)
     {
         // Ambil order yang baru saja dibuat
@@ -46,5 +55,4 @@ class OrderController extends Controller
         // Tampilkan halaman sukses
         return view('payment.success');
     }
-    
 }

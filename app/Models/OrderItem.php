@@ -49,8 +49,12 @@ class OrderItem extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function productVariants()
+    // public function productVariants()
+    // {
+    //     return $this->belongsToMany(ProductVariant::class, 'order_item_product_variants');
+    // }
+    public function productVariant()
     {
-        return $this->belongsToMany(ProductVariant::class, 'order_item_product_variants');
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 }

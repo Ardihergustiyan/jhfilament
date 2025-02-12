@@ -80,7 +80,18 @@
               </div>
 
               <!-- Discounted Price -->
-              <div class="text-2xl font-bold text-gray-800">Rp{{ number_format($product->het_price, 0, ',', '.') }}</div>
+              {{-- <div class="text-2xl font-bold text-gray-800">Rp{{ number_format($product->het_price, 0, ',', '.') }}</div> --}}
+              @auth
+                  <p id="userRole">
+                      @if (Auth::user()->hasRole('Reseller'))
+                          Harga Reseller: {{ $product->final_price }}
+                      @else
+                          Harga Normal: {{ $product->het_price }}
+                      @endif
+                  </p>
+              @else
+                  <p>Harga Normal: {{ $product->het_price }}</p>
+              @endauth
             </div>
 
             <!-- Buttons and Quantity -->

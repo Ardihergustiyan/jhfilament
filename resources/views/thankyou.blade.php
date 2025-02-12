@@ -56,12 +56,17 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($order->items as $item)
+                @foreach ($order->orderItems as $item)
                 <tr class="border-b">
                     <td class="px-4 py-2">{{ $item->quantity }}</td>
-                    <td class="px-4 py-2">{{ $item->product->name }}</td>
-                    <td class="px-4 py-2">Rp {{ number_format($item->total_price, 0, ',', '.') }}</td>
-                    <td class="px-4 py-2">Rp {{ number_format($item->total_price * $item->quantity, 0, ',', '.') }}</td>
+                    <td class="px-4 py-2">
+                        {{ $item->product->name }}
+                        @if ($item->productVariant)
+                            <br><span class="text-sm text-gray-600">Variant: {{ $item->productVariant->color }}</span>
+                        @endif
+                    </td>
+                    <td class="px-4 py-2">Rp {{ number_format($item->unit_price, 0, ',', '.') }}</td>
+                    <td class="px-4 py-2">Rp {{ number_format($item->unit_price * $item->quantity, 0, ',', '.') }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -69,9 +74,12 @@
 
         <!-- Totals -->
         <div class="text-right">
-            <p class="text-gray-600">Subtotal: Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
-            <p class="text-gray-600">Sales Tax (5%): Rp {{ number_format($order->total_price * 0.05, 0, ',', '.') }}</p>
-            <p class="font-bold text-lg">Invoice Total: Rp {{ number_format($order->total_price * 1.05, 0, ',', '.') }}</p>
+            <p class="text-gray-600">Subtotal: Rp {{ number_format($subtotal, 0, ',', '.') }}</p>
+            @if ($voucherAmount > 0)
+                <p class="text-gray-600">Voucher Discount: -Rp {{ number_format($voucherAmount, 0, ',', '.') }}</p>
+            @endif
+            <p class="text-gray-600">Sales Tax (5%): Rp {{ number_format($total * 0.05, 0, ',', '.') }}</p>
+            <p class="font-bold text-lg">Invoice Total: Rp {{ number_format($total * 1.05, 0, ',', '.') }}</p>
         </div>
 
         <!-- Terms & Conditions -->
