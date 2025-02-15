@@ -1,7 +1,7 @@
 @include('layouts.header')
 @include('components.navbar')
 <!-- about -->
-<div class="bg-white flex flex-col items-center text-center relative z-0 ">
+<div class="flex flex-col items-center text-center relative z-0 ">
     <!-- Background Image -->
     <div class="absolute inset-0 flex items-center justify-center">
       <img src="{{ asset('img/earth.png') }}" alt="Map Background" class="w-full h-auto max-w-screen-2xl object-cover" />
@@ -49,44 +49,86 @@
 
   <!-- get in touch -->
   <div class="my-10 flex items-center justify-center">
-    <div class="flex items-center justify-center p-2 md:p-8 bg-[#f98b88] w-full max-w-screen-2xl rounded-lg shadow-lg">
-      <div class="bg-white rounded-lg shadow-xl p-8 m-4 w-full">
-        <h2 class="text-center text-2xl font-semibold text-[#f98b88] mb-8">Get In Touch</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="flex items-center justify-center p-4 md:p-8 bg-[#f98b88] w-full max-w-screen-2xl rounded-lg shadow-lg">
+      <div class="bg-white rounded-lg shadow-xl p-6 md:p-8 m-4 w-full">
+        <!-- Judul Section -->
+        <h2 class="text-center text-2xl md:text-3xl font-semibold text-[#f98b88] mb-6 md:mb-8">Get In Touch</h2>
+  
+        <!-- Grid untuk Form dan Informasi Kontak -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           <!-- Left Section: Form -->
           <div>
-            <h3 class="text-lg font-medium mb-4">Leave us a message</h3>
+            <h3 class="text-lg md:text-xl font-medium mb-4 text-gray-800">Leave us a message</h3>
             <form action="#" method="POST" class="space-y-4">
+              <!-- Input Nama -->
               <div>
-                <label for="name" class="block font-medium">Name</label>
-                <input type="text" id="name" name="name" placeholder="Your name" class="w-full mt-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <label for="name" class="block font-medium text-gray-700">Name</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  placeholder="Your name"
+                  class="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#f98b88] focus:border-transparent"
+                />
               </div>
+  
+              <!-- Input Email -->
               <div>
-                <label for="email" class="block font-medium">Email Address</label>
-                <input type="email" id="email" name="email" placeholder="Email Address" class="w-full mt-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <label for="email" class="block font-medium text-gray-700">Email Address</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="Email Address"
+                  class="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#f98b88] focus:border-transparent"
+                />
               </div>
+  
+              <!-- Input Pesan -->
               <div>
-                <label for="message" class="block font-medium">Your Message</label>
-                <textarea id="message" name="message" rows="4" placeholder="Your Message" class="w-full mt-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
+                <label for="message" class="block font-medium text-gray-700">Your Message</label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows="4"
+                  placeholder="Your Message"
+                  class="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#f98b88] focus:border-transparent"
+                ></textarea>
               </div>
+  
+              <!-- Tombol Submit -->
               <button
                 type="submit"
-                class="px-6 py-2 bg-[#f98b88] text-white font-semibold rounded-md shadow-md hover:bg-[#f77d7a] focus:ring-4 focus:outline-none focus:ring-pink-300 "
+                class="w-full md:w-auto px-6 py-2 bg-[#f98b88] text-white font-semibold rounded-md shadow-md hover:bg-[#f77d7a] focus:outline-none focus:ring-2 focus:ring-[#f98b88] focus:ring-opacity-50 transition-colors duration-200"
               >
                 Send
               </button>
             </form>
           </div>
-
-          <!-- Right Section: Contact Information -->
+  
+          <!-- Right Section: Informasi Kontak -->
           <div>
-            <h3 class="text-lg font-medium mb-4">Contact Information :</h3>
-            <p class="flex items-center mb-2">
-              <span class="mr-2">📍</span>
-              Jl. Dr. Susanto No.92, Pati Lor, Kabupaten Pati, Jawa Tengah 59111
-            </p>
-            <p class="flex items-center mb-2"><span class="mr-2">📞</span> +62 899-0636-000</p>
-            <p class="flex items-center mb-4"><span class="mr-2">📧</span> Buka : Jam 9 - 10 Malam</p>
+            <h3 class="text-lg md:text-xl font-medium mb-4 text-gray-800">Contact Information</h3>
+  
+            <!-- Alamat -->
+            <div class="flex items-center mb-3">
+              <span class="mr-2 text-xl text-[#f98b88]">📍</span>
+              <p class="text-gray-700">Jl. Dr. Susanto No.92, Pati Lor, Kabupaten Pati, Jawa Tengah 59111</p>
+            </div>
+  
+            <!-- Nomor Telepon -->
+            <div class="flex items-center mb-3">
+              <span class="mr-2 text-xl text-[#f98b88]">📞</span>
+              <p class="text-gray-700">+62 899-0636-000</p>
+            </div>
+  
+            <!-- Jam Buka -->
+            <div class="flex items-center mb-6">
+              <span class="mr-2 text-xl text-[#f98b88]">📧</span>
+              <p class="text-gray-700">Buka : Jam 9 - 10 Malam</p>
+            </div>
+  
+            <!-- Google Maps -->
             <div class="mapouter">
               <div class="gmap_canvas">
                 <iframe

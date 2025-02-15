@@ -6,8 +6,8 @@
         <!-- Left Section: Image Display and Thumbnails -->
         <div class="max-w-full mx-auto px-4">
           <!-- Main Display Image -->
-          <div class="border border-gray-300 rounded-lg p-12 mb-6 bg-white relative overflow-hidden">
-              <div class="relative w-[421px] h-[355px]">
+          <div class="border border-gray-300 rounded-lg p-4 md:p-12 mb-6 bg-white relative overflow-hidden">
+              <div class="relative w-full md:w-[421px] h-[200px] md:h-[355px] mx-auto">
                   <img id="main-image" class="w-full h-full object-contain transition-transform duration-300 ease-in-out cursor-pointer" 
                       src="{{ asset('storage/' . ($variants->isNotEmpty() ? $variants->first()->images[0] : $productImages[0])) }}" 
                       alt="{{ $product->name }}" />
@@ -20,10 +20,10 @@
                       <!-- Thumbnails from Product Variants -->
                       @foreach ($variants as $variant)
                           @foreach ($variant->images as $image)
-                              <div class="swiper-slide flex justify-center max-w-20 min-w-20">
+                              <div class="swiper-slide flex justify-center max-w-16 min-w-16">
                                   <div onclick="changeImage('{{ asset('storage/' . $image) }}')" 
-                                      class="thumbnail border-2 border-gray-300 hover:border-pink-400 focus:border-pink-400 rounded-lg p-2 cursor-pointer">
-                                      <img class="w-16 h-16 object-cover" src="{{ asset('storage/' . $image) }}" alt="Thumbnail" />
+                                      class="thumbnail border-2 border-gray-300 hover:border-pink-400 focus:border-pink-400 rounded-lg p-1 cursor-pointer">
+                                      <img class="w-12 h-12 md:w-16 md:h-16 object-cover" src="{{ asset('storage/' . $image) }}" alt="Thumbnail" />
                                   </div>
                               </div>
                           @endforeach
@@ -31,17 +31,17 @@
                   @else
                       <!-- Thumbnails from Product Images -->
                       @foreach ($productImages as $image)
-                          <div class="swiper-slide flex justify-center max-w-20 min-w-20">
+                          <div class="swiper-slide flex justify-center max-w-16 min-w-16">
                               <div onclick="changeImage('{{ asset('storage/' . $image) }}')" 
-                                  class="thumbnail border-2 border-gray-300 hover:border-pink-400 focus:border-pink-400 rounded-lg p-2 cursor-pointer">
-                                  <img class="w-16 h-16 object-cover" src="{{ asset('storage/' . $image) }}" alt="Thumbnail" />
+                                  class="thumbnail border-2 border-gray-300 hover:border-pink-400 focus:border-pink-400 rounded-lg p-1 cursor-pointer">
+                                  <img class="w-12 h-12 md:w-16 md:h-16 object-cover" src="{{ asset('storage/' . $image) }}" alt="Thumbnail" />
                               </div>
                           </div>
                       @endforeach
                   @endif
               </div>
           </div>
-        </div>
+      </div>
       
         <!-- Right Section: Product Information -->
         <div class="mt-6 sm:mt-8 lg:mt-0 max-w-full px-4">
