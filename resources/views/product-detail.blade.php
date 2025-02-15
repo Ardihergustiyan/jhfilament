@@ -71,27 +71,53 @@
 
             <!-- Price -->
             <div class="mt-2">
+              <!-- Original Price with Strikethrough -->
               <div class="flex items-baseline space-x-2">
-                <!-- Original Price with Strikethrough -->
-                <span class="text-gray-500 text-lg line-through">Rp{{ number_format($product->base_price, 0, ',', '.') }}</span>
+                  <span class="text-gray-500 text-lg line-through">
+                      Rp{{ number_format($product->base_price, 0, ',', '.') }}
+                  </span>
 
-                <!-- Discount Percentage Badge -->
-                <span class="bg-yellow-200 text-yellow-800 text-xs font-semibold ml-1 px-2.5 py-0.5 rounded">-15%</span>
+                  <!-- Discount Percentage Badge -->
+                  <div class="flex items-center gap-2">
+                      <!-- Diskon Reguler (50%) -->
+                      <span class="rounded bg-pink-100 px-2.5 py-0.5 text-xs font-medium text-pink-800 dark:bg-pink-900 dark:text-pink-300">
+                          50% Off
+                      </span>
+
+                      <!-- Jika Ada Diskon Spesial -->
+                      @if ($product->total_discount > 0)
+                          <span class="text-sm text-gray-500 dark:text-gray-400">+</span>
+                          <span class="rounded bg-yellow-200 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                              🎉 {{ $product->discount_display }} Off
+                          </span>
+                      @endif
+                  </div>
               </div>
 
-              <!-- Discounted Price -->
-              {{-- <div class="text-2xl font-bold text-gray-800">Rp{{ number_format($product->het_price, 0, ',', '.') }}</div> --}}
-              @auth
-                  <p id="userRole">
-                      @if (Auth::user()->hasRole('Reseller'))
-                          Harga Reseller: {{ $product->final_price }}
-                      @else
-                          Harga Normal: {{ $product->het_price }}
-                      @endif
-                  </p>
-              @else
-                  <p>Harga Normal: {{ $product->het_price }}</p>
-              @endauth
+              <!-- Final Price -->
+              <div class="mt-1">
+                  @auth
+                      <p id="userRole" class="text-lg font-extrabold leading-tight text-gray-900 dark:text-white">
+                          @if (isset($product->discounted_price) && $product->discounted_price < $product->final_price)
+                              Rp {{ number_format($product->discounted_price, 0, ',', '.') }}
+                          @else
+                              @if (Auth::user()->hasRole('Reseller'))
+                                  Rp {{ number_format($product->final_price, 0, ',', '.') }}
+                              @else
+                                  Rp {{ number_format($product->het_price, 0, ',', '.') }}
+                              @endif
+                          @endif
+                      </p>
+                  @else
+                      <p class="text-lg font-extrabold leading-tight text-gray-900 dark:text-white">
+                          @if (isset($product->discounted_price) && $product->discounted_price < $product->het_price)
+                              Rp {{ number_format($product->discounted_price, 0, ',', '.') }}
+                          @else
+                              Rp {{ number_format($product->het_price, 0, ',', '.') }}
+                          @endif
+                      </p>
+                  @endauth
+              </div>
             </div>
 
             <!-- Buttons and Quantity -->

@@ -107,7 +107,7 @@
                 <a href="{{ route('product', array_merge(request()->query(), ['filter' => 'termurah'])) }}" class="group inline-flex w-full items-center rounded-md px-3 py-2 text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"> Termurah </a>
               </li>
               <li>
-                <a href="#" class="group inline-flex w-full items-center rounded-md px-3 py-2 text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"> Discount % </a>
+                <a href="{{ route('product', array_merge(request()->query(), ['filter' => 'discount'])) }}" class="group inline-flex w-full items-center rounded-md px-3 py-2 text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"> Discount % </a>
               </li>
             </ul>
           </div>
@@ -128,154 +128,179 @@
                 </a>
             </div>
         @else
-            @foreach ($allProducts  as $product)
-                <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                    <div class="h-40 w-full">
-                      <a href="{{ route('product.show', $product->slug) }}">
+        @foreach ($allProducts as $product)
+            <div class="product-item rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div class="h-40 w-full">
+                    <a href="{{ route('product.show', $product->slug) }}">
                         @if($product->main_image)
-                            <!-- Jika ada gambar dari varian -->
-                            <img class="mx-auto h-full" 
-                                src="{{ asset('storage/' . $product->main_image) }}" 
-                                alt="{{ $product->name }}" />
+                            <img class="mx-auto h-full" src="{{ asset('storage/' . $product->main_image) }}" alt="{{ $product->name }}" />
                         @else
-                            <!-- Jika tidak ada gambar dari varian, gunakan gambar dari produk -->
                             @php
                                 $productImages = json_decode($product->product_image, true);
                                 $mainImage = $productImages[0] ?? null;
                             @endphp
                             @if($mainImage)
-                                <img class="mx-auto h-full" 
-                                    src="{{ asset('storage/' . $mainImage) }}" 
-                                    alt="{{ $product->name }}" />
+                                <img class="mx-auto h-full" src="{{ asset('storage/' . $mainImage) }}" alt="{{ $product->name }}" />
                             @else
-                                <!-- Jika tidak ada gambar sama sekali, gunakan gambar default -->
-                                <img class="mx-auto h-full" 
-                                    src="{{ asset('path/to/default/image.jpg') }}" 
-                                    alt="{{ $product->name }}" />
+                                <img class="mx-auto h-full" src="{{ asset('path/to/default/image.jpg') }}" alt="{{ $product->name }}" />
                             @endif
                         @endif
-                      </a>
-                    </div>
-                    <div class="pt-4">
-                        <div class="mb-3 flex items-center justify-between gap-4">
-                            <span class="rounded bg-pink-100 px-2.5 py-0.5 text-xs font-medium text-pink-800 dark:bg-pink-900 dark:text-pink-300">Up to 35% off</span>
-                        </div>
-                        <a href="{{ route('product.show', $product->slug) }}" class="text-lg font-semibold leading-tight text-gray-900 hover:underline dark:text-white">{{ $product->name }}</a>
-                        <div class="mt-2 flex items-center gap-2">
-                            <div class="flex items-center">
-                                <svg class="h-4 w-4 text-yellow-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M13.8 4.2a2 2 0 0 0-3.6 0L8.4 8.4l-4.6.3a2 2 0 0 0-1.1 3.5l3.5 3-1 4.4c-.5 1.7 1.4 3 2.9 2.1l3.9-2.3 3.9 2.3c1.5 1 3.4-.4 3-2.1l-1-4.4 3.4-3a2 2 0 0 0-1.1-3.5l-4.6-.3-1.8-4.2Z" />
-                                </svg>
-                            </div>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                @if ($product->total_reviews > 0)
-                                    {{ number_format($product->average_rating, 1) }}
-                                @else
-                                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Belum ada ulasan</span>
-                                @endif
-                            </p>
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                @if ($product->total_reviews > 0)
-                                    ({{ $product->total_reviews }})
-                                @endif
-                            </p>
-                        </div>
-                        <div class="mt-4 flex items-center justify-between gap-1">
-                            <div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400"><del>Rp{{ number_format($product->base_price, 0, ',', '.') }},00</p>
-                                  @auth
-                                      <p id="userRole">
-                                          @if (Auth::user()->hasRole('Reseller'))
-                                              Harga Reseller: {{ $product->final_price }}
-                                          @else
-                                              Harga Normal: {{ $product->het_price }}
-                                          @endif
-                                      </p>
-                                  @else
-                                      <p>Harga Normal: {{ $product->het_price }}</p>
-                                  @endauth
-                            </div>
-                            
-                            {{-- Jika sudah login --}}
-                            
-                            @if (Auth::check())
-                              @if($product->variants->isEmpty())
-                                  <button 
-                                      type="button" 
-                                      class="inline-flex items-center rounded-lg bg-pink-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-pink-400 focus:outline-none focus:ring-4 focus:ring-pink-200 dark:bg-pink-400 dark:hover:bg-pink-500 dark:focus:ring-pink-500" 
-                                      onclick="addToCart({{ $product->id }})"
-                                  >
-                                      <svg class="-ms-2 me-2 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h1.5L8 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm.75-3H7.5M11 7H6.312M17 4v6m-3-3h6" />
-                                      </svg>
-                                      Add to cart
-                                  </button>
-                              @else
-                                  
-                                  <button 
-                                      type="button" 
-                                      class="inline-flex items-center rounded-lg bg-pink-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-pink-400 focus:outline-none focus:ring-4 focus:ring-pink-200 dark:bg-pink-400 dark:hover:bg-pink-500 dark:focus:ring-pink-500"
-                                      onclick="openModal('{{ $product->name }}', '{{ route('product.show', $product->slug) }}')"
-                                    >
-                                      <svg class="-ms-2 me-2 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h1.5L8 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm.75-3H7.5M11 7H6.312M17 4v6m-3-3h6" />
-                                      </svg>
-                                      Add to cart
-                                  </button>
+                    </a>
+                </div>
+                <div class="pt-4">
+                  <div class="mb-3 flex items-center gap-2">
+                      <!-- Badge untuk Diskon Reguler -->
+                      <div class="flex items-center gap-2">
+                          <span class="rounded  bg-pink-100 px-2.5 py-0.5 text-xs font-medium text-pink-800 dark:bg-pink-900 dark:text-pink-300 ">
+                              50% Off
+                          </span>
+                  
+                          <!-- Jika Ada Diskon Spesial -->
+                          @if ($product->total_discount > 0)
+                              <span class="text-sm text-gray-500 dark:text-gray-400">+</span>
+                              <span class="rounded bg-yellow-200 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-300 ">
+                                  🎉 {{ $product->discount_display }} Off
+                              </span>
+                          @endif
+                      </div>
+                  
+                      <!-- Tooltip untuk Informasi Diskon -->
+                      <div class="group relative inline-block">
+                          <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                          <div class="hidden group-hover:block absolute z-10 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-200 px-3 py-2 rounded-lg shadow-lg w-48">
+                              <p><strong>50% Off:</strong> Diskon reguler untuk semua produk.</p>
+                              @if ($product->total_discount > 0)
+                                  <p class="mt-1"><strong>{{ $product->discount_display }} Off:</strong> Diskon spesial terbatas!</p>
                               @endif
+                          </div>
+                      </div>
+                  </div>        
+                    <a href="{{ route('product.show', $product->slug) }}" class="text-lg font-semibold leading-tight text-gray-900 hover:underline dark:text-white">{{ $product->name }}</a>
+                    <div class="mt-2 flex items-center gap-2">
+                        <div class="flex items-center">
+                            <svg class="h-4 w-4 text-yellow-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M13.8 4.2a2 2 0 0 0-3.6 0L8.4 8.4l-4.6.3a2 2 0 0 0-1.1 3.5l3.5 3-1 4.4c-.5 1.7 1.4 3 2.9 2.1l3.9-2.3 3.9 2.3c1.5 1 3.4-.4 3-2.1l-1-4.4 3.4-3a2 2 0 0 0-1.1-3.5l-4.6-.3-1.8-4.2Z" />
+                            </svg>
+                        </div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                            @if ($product->total_reviews > 0)
+                                {{ number_format($product->average_rating, 1) }}
                             @else
-                                {{-- Jika belum login --}}
-                                <a href="/login" class="inline-flex items-center rounded-lg bg-pink-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-pink-400 focus:outline-none focus:ring-4 focus:ring-pink-200 dark:bg-pink-400 dark:hover:bg-pink-500 dark:focus:ring-pink-500">
+                                <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Belum ada ulasan</span>
+                            @endif
+                        </p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            @if ($product->total_reviews > 0)
+                                ({{ $product->total_reviews }})
+                            @endif
+                        </p>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between gap-1">
+                      <div>
+                          <p class="text-sm text-gray-500 dark:text-gray-400">
+                            <del>Rp{{ number_format($product->base_price, 0, ',', '.') }},00</del>
+                          </p>
+                        
+                          @auth
+                              <p id="userRole" class="text-lg font-extrabold leading-tight text-gray-900 dark:text-white">
+                                  @if (isset($product->discounted_price) && $product->discounted_price < $product->final_price)
+                                      Rp {{ number_format($product->discounted_price, 0, ',', '.') }},00
+                                  @else
+                                      @if (Auth::user()->hasRole('Reseller'))
+                                          Rp {{ number_format($product->final_price, 0, ',', '.') }},00
+                                      @else
+                                          Rp {{ number_format($product->het_price, 0, ',', '.') }},00
+                                      @endif
+                                  @endif
+                              </p>
+                          @else
+                              <p class="text-lg font-extrabold leading-tight text-gray-900 dark:text-white">
+                                  @if (isset($product->discounted_price) && $product->discounted_price < $product->het_price)
+                                      Rp {{ number_format($product->discounted_price, 0, ',', '.') }},00
+                                  @else
+                                      Rp {{ number_format($product->het_price, 0, ',', '.') }},00
+                                  @endif
+                              </p>
+                          @endauth
+                      </div>
+                        
+                        
+                        @if (Auth::check())
+                            @if($product->variants->isEmpty())
+                                <button type="button" class="inline-flex items-center rounded-lg bg-pink-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-pink-400 focus:outline-none focus:ring-4 focus:ring-pink-200 dark:bg-pink-400 dark:hover:bg-pink-500 dark:focus:ring-pink-500" onclick="addToCart({{ $product->id }})">
                                     <svg class="-ms-2 me-2 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h1.5L8 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm.75-3H7.5M11 7H6.312M17 4v6m-3-3h6" />
                                     </svg>
                                     Add to cart
-                                </a>
+                                </button>
+                            @else
+                                <button type="button" class="inline-flex items-center rounded-lg bg-pink-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-pink-400 focus:outline-none focus:ring-4 focus:ring-pink-200 dark:bg-pink-400 dark:hover:bg-pink-500 dark:focus:ring-pink-500" onclick="openModal('{{ $product->name }}', '{{ route('product.show', $product->slug) }}')">
+                                    <svg class="-ms-2 me-2 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h1.5L8 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm.75-3H7.5M11 7H6.312M17 4v6m-3-3h6" />
+                                    </svg>
+                                    Add to cart
+                                </button>
                             @endif
-                            <!-- Modal Container -->
-                            <div id="customModal" class="hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-gray-800 bg-opacity-50">
-                              <div class="relative p-4 w-full max-w-md max-h-full bg-white rounded-lg shadow-lg dark:bg-gray-800">
-                                  <!-- Modal Body -->
-                                  <div class="p-4 md:p-5">
-                                      <div class="flex flex-col items-center text-center">
-                                          <!-- Ikon Peringatan -->
-                                          <div class="w-12 h-12 mb-4 text-pink-500 dark:text-pink-400">
-                                              <svg class="w-full h-full" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                              </svg>
-                                          </div>
-                          
-                                          <!-- Pesan Utama -->
-                                          <h3 id="modalTitle" class="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-                                              Anda belum memilih warna!
-                                          </h3>
-                          
-                                          <!-- Pesan Tambahan -->
-                                          <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-                                              Silakan pilih warna produk terlebih dahulu sebelum menambahkan ke keranjang.
-                                          </p>
-                          
-                                          <!-- Tombol Aksi -->
-                                          <div class="flex items-center justify-center gap-3">
-                                              <a id="modalDetailLink" href="#" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white bg-pink-500 hover:bg-pink-600 focus:ring-4 focus:ring-pink-300 rounded-lg dark:bg-pink-600 dark:hover:bg-pink-700 dark:focus:ring-pink-800">
-                                                  <svg class="w-4 h-4 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-4 4V6a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v5m4 0v5m4-5v5m-8-5v5m4-5v5M4 6v13c0 1.1.9 2 2 2h13c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2Z"/>
-                                                  </svg>
-                                                  Lihat Detail
-                                              </a>
-                                              <button id="closeModalButton" type="button" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-pink-700 focus:z-10 focus:ring-4 focus:ring-gray-100 rounded-lg dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700">
-                                                  Tutup
-                                              </button>
-                                          </div>
-                                      </div>
-                                  </div>
-                              </div>
-                          </div>
-                        </div>
+                        @else
+                            <a href="/login" class="inline-flex items-center rounded-lg bg-pink-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-pink-400 focus:outline-none focus:ring-4 focus:ring-pink-200 dark:bg-pink-400 dark:hover:bg-pink-500 dark:focus:ring-pink-500">
+                                <svg class="-ms-2 me-2 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h1.5L8 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm.75-3H7.5M11 7H6.312M17 4v6m-3-3h6" />
+                                </svg>
+                                Add to cart
+                            </a>
+                        @endif
                     </div>
                 </div>
-                
-            @endforeach
+            </div>
+        @endforeach
+    
+    <!-- Modal Container -->
+    <div id="customModal" class="hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-gray-800 bg-opacity-50">
+        <div class="relative p-4 w-full max-w-md max-h-full bg-white rounded-lg shadow-lg dark:bg-gray-800">
+            <div class="p-4 md:p-5">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-12 h-12 mb-4 text-pink-500 dark:text-pink-400">
+                        <svg class="w-full h-full" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                        </svg>
+                    </div>
+                    <h3 id="modalTitle" class="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
+                        Anda belum memilih warna!
+                    </h3>
+                    <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+                        Silakan pilih warna produk terlebih dahulu sebelum menambahkan ke keranjang.
+                    </p>
+                    <div class="flex items-center justify-center gap-3">
+                        <a id="modalDetailLink" href="#" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white bg-pink-500 hover:bg-pink-600 focus:ring-4 focus:ring-pink-300 rounded-lg dark:bg-pink-600 dark:hover:bg-pink-700 dark:focus:ring-pink-800">
+                            <svg class="w-4 h-4 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-4 4V6a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v5m4 0v5m4-5v5m-8-5v5m4-5v5M4 6v13c0 1.1.9 2 2 2h13c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2Z"/>
+                            </svg>
+                            Lihat Detail
+                        </a>
+                        <button id="closeModalButton" type="button" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-pink-700 focus:z-10 focus:ring-4 focus:ring-gray-100 rounded-lg dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700">
+                            Tutup
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function openModal(productName, productLink) {
+            document.getElementById('modalTitle').innerText = `Anda belum memilih warna untuk ${productName}!`;
+            document.getElementById('modalDetailLink').href = productLink;
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+    
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+    
+        document.getElementById('closeModalButton').addEventListener('click', closeModal);
+    </script>
         @endif
       
         
@@ -599,10 +624,11 @@
           closeModal();
       }
   });
+
   let isLoading = false;
 let currentPage = 1;
 
-window.addEventListener('scroll', function() {
+window.addEventListener('scroll', function () {
     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
 
     if (scrollTop + clientHeight >= scrollHeight - 100 && !isLoading) {
@@ -631,9 +657,8 @@ window.addEventListener('scroll', function() {
                 productContainer.appendChild(product);
             });
 
-            // Perbaiki pengecekan apakah masih ada halaman berikutnya
+            // Hentikan infinite scroll jika tidak ada produk baru
             if (newProducts.length === 0) {
-                console.log("Semua produk sudah dimuat. Menghapus event listener.");
                 window.removeEventListener('scroll', arguments.callee);
             }
         })
@@ -641,7 +666,7 @@ window.addEventListener('scroll', function() {
             console.error('Error loading more products:', error);
         })
         .finally(() => {
-            // Sembunyikan indikator loading setelah selesai (baik sukses maupun gagal)
+            // Sembunyikan indikator loading
             if (loadingIndicator) {
                 loadingIndicator.classList.add('hidden');
             }
@@ -650,181 +675,6 @@ window.addEventListener('scroll', function() {
     }
 });
 
-
-// let isLoading = false; // Untuk mencegah multiple requests
-// let currentPage = 1; // Mulai dari halaman pertama
-
-// function loadMoreProducts() {
-//     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-
-//     if (scrollTop + clientHeight >= scrollHeight - 100 && !isLoading) {
-//         isLoading = true;
-//         currentPage++;
-
-//         const loadingIndicator = document.getElementById('loadingIndicator');
-//         loadingIndicator.classList.remove('hidden');
-
-//         fetch(`?page=${currentPage}`, {
-//             headers: {
-//                 'X-Requested-With': 'XMLHttpRequest'
-//             }
-//         })
-//         .then(response => response.text())
-//         .then(html => {
-//             const parser = new DOMParser();
-//             const doc = parser.parseFromString(html, 'text/html');
-//             const newProducts = doc.querySelectorAll('.product-item');
-
-//             const productContainer = document.getElementById('productList');
-
-//             // Loop untuk menambahkan semua produk ke dalam daftar
-//             newProducts.forEach((product, index) => {
-//                 setTimeout(() => {
-//                     productContainer.appendChild(product);
-                    
-//                     // Jika ini adalah produk terakhir yang ditambahkan, baru sembunyikan loading indicator
-//                     if (index === newProducts.length - 1) {
-//                         isLoading = false;
-//                         loadingIndicator.classList.add('hidden');
-//                     }
-//                 }, 100 * index); // Delay tiap produk agar terlihat loadingnya
-//             });
-
-//             // Jika tidak ada produk baru, matikan event listener
-//             if (newProducts.length === 0) {
-//                 window.removeEventListener('scroll', loadMoreProducts);
-//                 loadingIndicator.classList.add('hidden'); // Pastikan indikator loading disembunyikan
-//             }
-
-//             // Re-init Flowbite modals setelah semua produk ditambahkan
-//             initFlowbiteModals();
-//         })
-//         .catch(error => {
-//             console.error('Error loading more products:', error);
-//             isLoading = false;
-//             loadingIndicator.classList.add('hidden');
-//         });
-//     }
-// }
-
-// // Tambahkan event listener dengan referensi fungsi yang benar
-// window.addEventListener('scroll', loadMoreProducts);
-
-// function initFlowbiteModals() {
-//     // Re-init Flowbite modals
-//     const modalButtons = document.querySelectorAll('[data-modal-toggle]');
-//     modalButtons.forEach(button => {
-//         const target = button.getAttribute('data-modal-target');
-//         const modal = document.querySelector(target);
-
-//         if (modal) {
-//             // Hapus event listener sebelumnya untuk menghindari duplikasi
-//             button.removeEventListener('click', toggleModal);
-//             button.addEventListener('click', toggleModal);
-//         }
-//     });
-
-//     function toggleModal() {
-//         const target = this.getAttribute('data-modal-target');
-//         const modal = document.querySelector(target);
-//         if (modal) {
-//             modal.classList.toggle('hidden');
-//         }
-//     }
-// }
-</script>
-
-<script>
-//   let isLoading = false;
-// let currentPage = 1;
-
-// window.addEventListener('scroll', function() {
-//     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-
-//     if (scrollTop + clientHeight >= scrollHeight - 100 && !isLoading) {
-//         isLoading = true;
-//         currentPage++;
-
-//         fetch(`?page=${currentPage}`, {
-//             headers: {
-//                 'X-Requested-With': 'XMLHttpRequest'
-//             }
-//         })
-//         .then(response => response.text())
-//         .then(html => {
-//             const parser = new DOMParser();
-//             const doc = parser.parseFromString(html, 'text/html');
-//             const newProducts = doc.querySelectorAll('.product-item');
-
-//             const productContainer = document.getElementById('productList');
-//             newProducts.forEach(product => {
-//                 productContainer.appendChild(product);
-//             });
-
-//             // Cek apakah masih ada halaman berikutnya
-//             const hasMorePages = doc.querySelector('.product-item') !== null;
-//             if (!hasMorePages) {
-//                 window.removeEventListener('scroll', this);
-//             }
-
-//             isLoading = false;
-//         })
-//         .catch(error => {
-//             console.error('Error loading more products:', error);
-//             isLoading = false;
-//         });
-//     }
-// });
-  // let page = 1; // Initial page number
-  // const loadMoreButton = document.getElementById('loadMoreButton');
-  
-  // loadMoreButton.addEventListener('click', function() {
-  //     page++; // Increase page number
-  //     loadMoreButton.textContent = 'Loading...'; // Change button text to "Loading"
-  //     loadMoreButton.disabled = true; // Optionally disable the button to prevent multiple clicks
-  //     fetchProducts(page);
-  // });
-
-  // function fetchProducts(page) {
-  //     const filter = new URLSearchParams(window.location.search).get('filter'); // Get current filter
-  //     const url = `/product?page=${page}&filter=${filter}`; // URL endpoint for fetching more products
-
-  //     fetch(url)
-  //         .then(response => response.text())
-  //         .then(html => {
-  //             const productList = document.getElementById('productList');
-  //             const parser = new DOMParser();
-  //             const doc = parser.parseFromString(html, 'text/html');
-  //             const newProducts = doc.querySelector('#productList').innerHTML; // Get new products
-  //             productList.innerHTML += newProducts; // Append new products to the list
-
-  //             // Once the content is loaded, revert the button text and enable it
-  //             loadMoreButton.textContent = 'Show more'; // Reset button text
-  //             loadMoreButton.disabled = false; // Re-enable button
-
-  //             // Check if there are no more pages, and hide the button
-  //             const hasMorePages = doc.querySelector('#loadMoreButton');
-  //             if (!hasMorePages) {
-  //                 loadMoreButton.style.display = 'none'; // Hide the button if no more pages
-  //             }
-  //         })
-  //         .catch(error => {
-  //             console.log('Error loading more products:', error);
-  //             loadMoreButton.textContent = 'Show more'; // Reset button text on error
-  //             loadMoreButton.disabled = false; // Re-enable button
-  //         });
-
-  //         document.querySelectorAll('[data-modal-hide]').forEach(button => {
-  //           button.addEventListener('click', function () {
-  //               const modalId = this.getAttribute('data-modal-hide');
-  //               const modal = document.getElementById(modalId);
-  //               if (modal) {
-  //                   modal.classList.add('hidden');
-  //               }
-  //           });
-  //       });
-
-  // }
 </script>
 
 

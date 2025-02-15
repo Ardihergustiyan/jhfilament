@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -15,7 +16,14 @@ class ProductController extends Controller
         $minPrice = $request->query('min_price', 10000); // Default minimum price
         $maxPrice = $request->query('max_price', 1000000); // Default maximum price
         
+        // Ambil kategori dari request
+        $category = $request->query('category', 'all'); // Definisikan variabel $category di sini
+        $selectedCategories = $request->query('categories') 
+            ? explode(',', $request->query('categories')) 
+            : [];
+        
         $resellerLevelId = auth()->user()->reseller_level_id ?? null;
+        
         // Query Produk
         $query = Product::select(
             'products.*',
@@ -24,11 +32,12 @@ class ProductController extends Controller
             'products.image as product_image',
             'ratings.average_rating',
             'review_counts.total_reviews',
-            DB::raw('IFNULL(product_prices.price, products.het_price) as final_price') // Gunakan harga reseller atau het_price
+            DB::raw('IFNULL(product_prices.price, products.het_price) as final_price'), // Gunakan harga reseller atau het_price
+            DB::raw('IFNULL(product_prices.price, products.het_price) as discount_price') // Tambahkan base_price untuk perhitungan diskon
         )
         ->leftJoin('product_prices', function ($join) use ($resellerLevelId) {
             $join->on('products.id', '=', 'product_prices.product_id')
-                 ->where('product_prices.reseller_level_id', '=', $resellerLevelId);
+                ->where('product_prices.reseller_level_id', '=', $resellerLevelId);
         })
         ->leftJoinSub(
             DB::table('order_items')
@@ -69,22 +78,10 @@ class ProductController extends Controller
         ->join('categories', 'products.category_id', '=', 'categories.id')
         ->join('general_categories', 'categories.general_category_id', '=', 'general_categories.id');
         
-        // Filter rentang harga
-        // $query->whereBetween('products.het_price', [$minPrice, $maxPrice]);
-        $query->whereBetween(
-            DB::raw('IFNULL(product_prices.price, products.het_price)'), 
-            [$minPrice, $maxPrice]
-        );
-    
-        // Filter kategori dan lainnya (tetap sama)
-        $category = $request->query('category', 'all');
-        $selectedCategories = $request->query('categories') 
-            ? explode(',', $request->query('categories')) 
-            : [];
-        
+        // Filter berdasarkan kategori
         if ($category && $category !== 'all') {
             $query->where('general_categories.slug', $category);
-    
+
             if (!empty($selectedCategories)) {
                 $query->where(function ($q) use ($selectedCategories) {
                     foreach ($selectedCategories as $slug) {
@@ -93,7 +90,7 @@ class ProductController extends Controller
                 });
             }
         }
-    
+
         if ($category === 'all' && !empty($selectedCategories)) {
             $query->where(function ($q) use ($selectedCategories) {
                 foreach ($selectedCategories as $slug) {
@@ -102,29 +99,51 @@ class ProductController extends Controller
             });
         }
 
+        // Filter berdasarkan query pencarian
         if ($request->has('query') && $request->query('query') !== '') {
             $query->where('products.name', 'LIKE', "%{$request->query('query')}%");
         }
-        
-    
+
+        // Hitung harga setelah diskon untuk setiap produk
+        $allProducts = $query->get();
+
+        foreach ($allProducts as $product) {
+            $discounts = $this->getApplicableDiscounts($product->id, $product->category_id);
+            $product->discounted_price = $this->calculateDiscountedPrice($product->final_price, $discounts);
+            $product->total_discount = $this->calculateTotalDiscount($discounts); // Simpan total diskon
+            $product->discount_display = $this->formatDiscountDisplay($discounts); // Simpan format tampilan diskon
+        }
+
+        // Filter berdasarkan rentang harga setelah diskon
+        $allProducts = $allProducts->filter(function ($product) use ($minPrice, $maxPrice) {
+            return $product->discounted_price >= $minPrice && $product->discounted_price <= $maxPrice;
+        });
+
         // Filter berdasarkan sorting
         $filter = $request->query('filter');
         if ($filter === 'trending') {
-            $query->orderBy('review_counts.total_reviews', 'desc');
+            $allProducts = $allProducts->sortByDesc('total_reviews');
         } elseif ($filter === 'terbaru') {
-            $query->orderBy('products.created_at', 'desc');
+            $allProducts = $allProducts->sortByDesc('created_at');
         } elseif ($filter === 'terlaris') {
-            $query->orderBy('aggregated_data.total_quantity', 'desc');
+            $allProducts = $allProducts->sortByDesc('total_quantity');
         } elseif ($filter === 'termahal') {
-            $query->orderBy('final_price', 'desc');
+            $allProducts = $allProducts->sortByDesc('discounted_price');
         } elseif ($filter === 'termurah') {
-            $query->orderBy('final_price', 'asc');
-        }
-        
-    
+            $allProducts = $allProducts->sortBy('discounted_price');
+        } 
+
         // Pagination
-        $allProducts = $query->paginate(20, ['*'], 'page', $request->query('page', 1));
-    
+        $page = $request->query('page', 1);
+        $perPage = 20;
+        $paginatedProducts = new LengthAwarePaginator(
+            $allProducts->forPage($page, $perPage),
+            $allProducts->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
         // Ambil tipe produk untuk filter checkbox
         $productTypes = DB::table('categories')
         ->select(
@@ -140,24 +159,20 @@ class ProductController extends Controller
         ->distinct()
         ->get()
         ->unique('category_name'); // Hapus duplikasi berdasarkan nama kategori
-    
 
-        
         // Pastikan selectedCategories tidak mengandung duplikasi
         $selectedCategories = array_unique($selectedCategories);
 
-
         if ($request->ajax()) {
             return view('partials.products', [
-                'allProducts' => $allProducts,
+                'allProducts' => $paginatedProducts,
             ]);
         }
 
         return view('product', [
-            'allProducts' => $allProducts,
+            'allProducts' => $paginatedProducts,
             'productTypes' => $productTypes,
             'selectedCategoryNames' => $selectedCategories,
-            'hasMorePages' => $allProducts->hasMorePages(),
         ]);
     }
 
@@ -175,7 +190,8 @@ class ProductController extends Controller
             'products.*',
             'ratings.average_rating',
             'review_counts.total_reviews',
-            DB::raw('IFNULL(product_prices.price, products.het_price) as final_price') // Tambahkan kolom final_price
+            DB::raw('IFNULL(product_prices.price, products.het_price) as final_price'), // Gunakan harga reseller atau het_price
+            DB::raw('IFNULL(product_prices.price, products.het_price) as discount_price') // Tambahkan base_price untuk perhitungan diskon
         )
         ->leftJoinSub(
             DB::table('product_reviews')
@@ -201,6 +217,12 @@ class ProductController extends Controller
         })
         ->where('products.slug', $slug)
         ->firstOrFail();
+
+        // Hitung diskon untuk produk ini
+        $discounts = $this->getApplicableDiscounts($product->id, $product->category_id);
+        $product->discounted_price = $this->calculateDiscountedPrice($product->final_price, $discounts);
+        $product->total_discount = $this->calculateTotalDiscount($discounts); // Simpan total diskon
+        $product->discount_display = $this->formatDiscountDisplay($discounts); // Simpan format tampilan diskon
 
         // Ambil gambar utama (gambar pertama dari kolom image)
         $productImages = is_array($product->image) ? $product->image : json_decode($product->image, true); // Pastikan data berupa array
@@ -290,5 +312,60 @@ class ProductController extends Controller
             'status' => 'success',
             'data' => $products,
         ]);
+    }
+
+    private function getApplicableDiscounts($productId, $categoryId)
+    {
+        $now = now();
+
+        return DB::table('discounts')
+            ->where(function ($query) use ($productId, $categoryId) {
+                $query->where('applicable_to', 'Semua') // Diskon untuk semua produk
+                    ->orWhere(function ($query) use ($productId) {
+                        $query->where('applicable_to', 'Product')
+                            ->whereJsonContains('applicable_ids', (string) $productId); // Pastikan productId dikonversi ke string
+                    })
+                    ->orWhere(function ($query) use ($categoryId) {
+                        $query->where('applicable_to', 'Category')
+                            ->whereJsonContains('applicable_ids', (string) $categoryId); // Pastikan categoryId dikonversi ke string
+                    });
+            })
+            ->where('start_date', '<=', $now) // Diskon aktif
+            ->where('end_date', '>=', $now) // Diskon belum kadaluarsa
+            ->get();
+    }
+
+    private function calculateDiscountedPrice($price, $discounts)
+    {
+        $discountedPrice = $price;
+
+        foreach ($discounts as $discount) {
+            $discountedPrice -= $discountedPrice * ($discount->discount_percentage / 100);
+        }
+
+        // Pastikan harga diskon tidak kurang dari 0
+        return max($discountedPrice, 0);
+    }
+
+    private function calculateTotalDiscount($discounts)
+    {
+        $totalDiscount = 0;
+
+        foreach ($discounts as $discount) {
+            $totalDiscount += $discount->discount_percentage;
+        }
+
+        return $totalDiscount;
+    }
+
+    private function formatDiscountDisplay($discounts)
+    {
+        $discountTexts = [];
+
+        foreach ($discounts as $discount) {
+            $discountTexts[] = $discount->discount_percentage . '%';
+        }
+
+        return implode(' + ', $discountTexts);
     }
 }

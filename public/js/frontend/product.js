@@ -43,9 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   setupAccordion("accordion-btn-tipe-produk", "accordion-content-tipe-produk", "icon-tipe-produk");
   setupAccordion("accordion-btn-harga", "accordion-content-harga", "icon-harga");
-  // Referensi elemen slider dan display
-// Referensi elemen slider dan display
-// Referensi elemen slider dan display
+
 const sliderMin = document.getElementById("slider-min");
 const sliderMax = document.getElementById("slider-max");
 const sliderRange = document.getElementById("slider-range");
@@ -84,28 +82,6 @@ const updateSlider = () => {
     rangeResultMin.textContent = minValue.toLocaleString("id-ID");
     rangeResultMax.textContent = maxValue.toLocaleString("id-ID");
 };
-
-// Fungsi untuk inisialisasi posisi slider
-// const initializeSlider = () => {
-//     const sliderWidth = sliderRange.offsetWidth;
-
-//     // Pastikan slider memiliki lebar yang valid
-//     if (sliderWidth === 0) {
-//         setTimeout(initializeSlider, 100); // Ulangi inisialisasi jika slider belum memiliki lebar valid
-//         return;
-//     }
-
-//     // Hitung posisi berdasarkan harga minimum dan maksimum
-//     const minLeft = priceToPosition(minPrice); // Posisi slider kiri
-//     const maxLeft = sliderWidth; // Posisi slider kanan (ujung slider)
-
-//     // Set posisi awal slider
-//     sliderMin.style.left = `${minLeft}px`;
-//     sliderMax.style.left = `${maxLeft}px`;
-
-//     // Perbarui tampilan harga
-//     updateSlider();
-// };
 
 const initializeSlider = () => {
     const sliderWidth = sliderRange.offsetWidth;
@@ -206,42 +182,7 @@ const autoSearch = () => {
     });
 });
 
-// const onDrag = (e, element) => {
-//     const rangeLeft = sliderRange.getBoundingClientRect().left;
-//     const rangeWidth = sliderRange.offsetWidth;
 
-//     let x = e.clientX - rangeLeft;
-
-//     if (x < 0) x = 0;
-//     if (x > rangeWidth) x = rangeWidth;
-
-//     if (element === sliderMin) {
-//         const maxLeft = parseInt(sliderMax.style.left || `${rangeWidth}px`, 10);
-//         if (x > maxLeft) x = maxLeft;
-//     } else if (element === sliderMax) {
-//         const minLeft = parseInt(sliderMin.style.left || "0", 10);
-//         if (x < minLeft) x = minLeft;
-//     }
-
-//     element.style.left = `${x}px`;
-//     updateSlider();
-// };
-
-// // Event listener untuk drag slider
-// [sliderMin, sliderMax].forEach((slider) => {
-//     slider.addEventListener("mousedown", () => {
-//         const onMouseMove = (event) => onDrag(event, slider);
-//         document.addEventListener("mousemove", onMouseMove);
-
-//         document.addEventListener(
-//             "mouseup",
-//             () => {
-//                 document.removeEventListener("mousemove", onMouseMove);
-//             },
-//             { once: true }
-//         );
-//     });
-// });
 
 // Inisialisasi slider setelah semua elemen selesai dirender
     window.addEventListener("load", () => {
@@ -265,43 +206,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const sliderMax = document.getElementById('slider-max');
     const rangeResultMin = document.getElementById('rangeResultMin');
     const rangeResultMax = document.getElementById('rangeResultMax');
-    // const applyFilterButton = document.getElementById('apply-price-filter');
+    const applyFilterButton = document.getElementById('apply-price-filter');
 
     // Validasi elemen ada di DOM
-    if (!sliderMin || !sliderMax || !rangeResultMin || !rangeResultMax /*|| !applyFilterButton*/) {
+    if (!sliderMin || !sliderMax || !rangeResultMin || !rangeResultMax || !applyFilterButton) {
         console.error("Slider or filter elements not found in DOM.");
         return;
     }
 
     // Fungsi untuk memperbarui tampilan harga
     const updatePriceDisplay = () => {
-        const minPrice = parseInt(sliderMin.style.left || "0", 10); // Nilai slider min
-        const maxPrice = parseInt(sliderMax.style.left || "0", 10); // Nilai slider max
+        const minPrice = parseInt(sliderMin.value, 10); // Ambil nilai dari slider min
+        const maxPrice = parseInt(sliderMax.value, 10); // Ambil nilai dari slider max
 
         rangeResultMin.textContent = minPrice.toLocaleString("id-ID");
         rangeResultMax.textContent = maxPrice.toLocaleString("id-ID");
     };
 
-    // Fungsi untuk menerapkan filter
-    // const applyFilter = () => {
-    //     const minPrice = parseInt(rangeResultMin.textContent.replace(/\D/g, ""), 10) || 10000;
-    //     const maxPrice = parseInt(rangeResultMax.textContent.replace(/\D/g, ""), 10) || 1000000;
+    // Fungsi untuk menerapkan filter harga
+    const applyPriceFilter = () => {
+        const minPrice = parseInt(sliderMin.value, 10);
+        const maxPrice = parseInt(sliderMax.value, 10);
 
-    //     const urlParams = new URLSearchParams(window.location.search);
-    //     urlParams.set('min_price', minPrice);
-    //     urlParams.set('max_price', maxPrice);
-
-    //     window.location.search = urlParams.toString(); // Redirect dengan query parameter
-    // };
-
+        // Redirect atau reload halaman dengan parameter harga
+        const url = new URL(window.location.href);
+        url.searchParams.set('min_price', minPrice);
+        url.searchParams.set('max_price', maxPrice);
+        window.location.href = url.toString();
+    };
 
     // Tambahkan event listener untuk slider dan tombol filter
     sliderMin.addEventListener('input', updatePriceDisplay);
     sliderMax.addEventListener('input', updatePriceDisplay);
-    // applyFilterButton.addEventListener('click', applyFilter);
+    applyFilterButton.addEventListener('click', applyPriceFilter);
 
     // Perbarui tampilan awal
     updatePriceDisplay();
 });
-
-
