@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
 {
-
     public function index()
     {
         // Mendapatkan user yang sedang login
@@ -48,6 +47,12 @@ class CartController extends Controller
             ->where('carts.user_id', $user->id)
             ->get();
 
+        // Hitung harga diskon untuk setiap item di keranjang
+        foreach ($cartItems as $cartItem) {
+            $discounts = $this->getApplicableDiscounts($cartItem->product_id, $cartItem->product->category_id);
+            $cartItem->discounted_price = $this->calculateDiscountedPrice($cartItem->final_price, $discounts);
+        }
+
         // Ambil variant yang sesuai dengan produk di keranjang
         $variants = ProductVariant::whereIn('product_id', $cartItems->pluck('product_id'))
             ->select('id', 'product_id', 'color', 'image') // Include variant image
@@ -56,9 +61,9 @@ class CartController extends Controller
         // Kelompokkan variants berdasarkan product_id
         $variantsGrouped = $variants->groupBy('product_id');
 
-        // Perhitungan subtotal
+        // Perhitungan subtotal berdasarkan harga diskon
         $subtotal = $cartItems->sum(function ($item) {
-            return ($item->final_price ?? 0) * ($item->quantity ?? 0); // Gunakan final_price
+            return ($item->discounted_price ?? $item->final_price ?? 0) * ($item->quantity ?? 0);
         });
 
         // Ambil voucher_id dari keranjang
@@ -93,7 +98,6 @@ class CartController extends Controller
             ->header('Pragma', 'no-cache')
             ->header('Expires', 'Sat, 01 Jan 2000 00:00:00 GMT');
     }
-
     public function addToCart(Request $request)
     {
         // Validasi input
@@ -118,6 +122,10 @@ class CartController extends Controller
                 $finalPrice = $productPrice->price;
             }
         }
+
+        // Hitung diskon untuk produk ini
+        $discounts = $this->getApplicableDiscounts($product->id, $product->category_id);
+        $discountedPrice = $this->calculateDiscountedPrice($finalPrice, $discounts);
 
         // Cek stok
         if ($request->variant_id) {
@@ -173,7 +181,7 @@ class CartController extends Controller
                 'product_id' => $product->id,
                 'quantity' => $request->quantity,
                 'variant_id' => $request->variant_id,
-                'final_price' => $finalPrice, // Simpan harga final
+                'final_price' => $discountedPrice, // Simpan harga final setelah diskon
             ]);
         }
 
@@ -200,9 +208,15 @@ class CartController extends Controller
             ->where('carts.user_id', $user->id)
             ->get();
 
-        // Hitung subtotal
+        // Hitung harga diskon untuk setiap item di keranjang
+        foreach ($cartItems as $cartItem) {
+            $discounts = $this->getApplicableDiscounts($cartItem->product_id, $cartItem->product->category_id);
+            $cartItem->discounted_price = $this->calculateDiscountedPrice($cartItem->final_price, $discounts);
+        }
+
+        // Hitung subtotal berdasarkan harga diskon
         $subtotal = $cartItems->sum(function ($item) {
-            return ($item->final_price ?? 0) * ($item->quantity ?? 0);
+            return ($item->discounted_price ?? $item->final_price ?? 0) * ($item->quantity ?? 0);
         });
 
         // Ambil voucher_id dari keranjang
@@ -328,62 +342,24 @@ class CartController extends Controller
     {
         // Ambil user yang sedang login
         $user = auth()->user();
-        $resellerLevelId = $user->reseller_level_id ?? null;
 
-        // Ambil item keranjang beserta harga reseller jika ada
-        $cartItems = Cart::select(
-                'carts.*', 
-                DB::raw('IFNULL(product_prices.price, products.het_price) as final_price')
-            )
-            ->join('products', 'carts.product_id', '=', 'products.id')
-            ->leftJoin('product_prices', function ($join) use ($resellerLevelId) {
-                $join->on('products.id', '=', 'product_prices.product_id')
-                    ->where('product_prices.reseller_level_id', '=', $resellerLevelId);
-            })
-            ->where('carts.user_id', $user->id)
-            ->get();
+        // Ambil item keranjang beserta ID-nya
+        $cartItems = Cart::where('user_id', $user->id)->get();
 
         // Jika keranjang kosong, kembalikan ke halaman cart dengan pesan error
         if ($cartItems->isEmpty()) {
             return redirect()->route('cart')->with('error', 'Keranjang Anda kosong.');
         }
 
-        // Hitung subtotal
-        $subtotal = $cartItems->sum(function ($item) {
-            return ($item->final_price ?? 0) * ($item->quantity ?? 0);
-        });
-
         // Ambil voucher_id dari keranjang
         $voucherId = $cartItems->first()->voucher_id ?? null;
-        $voucherAmount = 0;
 
-        if ($voucherId) {
-            // Cari voucher berdasarkan voucher_id
-            $voucher = Voucher::where('id', $voucherId)
-                            ->where('status', 'Unused')
-                            ->where('start_date', '<=', now())
-                            ->where('end_date', '>=', now())
-                            ->first();
+        // Simpan cartItemIds dan voucherId ke session
+        session(['cartItemIds' => $cartItems->pluck('id')->toArray()]);
+        session(['voucherId' => $voucherId]);
 
-            if ($voucher) {
-                // Hitung voucherAmount berdasarkan persentase diskon
-                $voucherAmount = ($subtotal * $voucher->discount_percentage) / 100;
-            } else {
-                // Jika voucher tidak valid, hapus voucher_id dari keranjang
-                Cart::where('user_id', $user->id)->update(['voucher_id' => null]);
-            }
-        }
-
-        // Hitung total
-        $total = $subtotal - $voucherAmount;
-
-        // Redirect ke halaman checkout dengan data cart
-        return redirect()->route('checkout')->with([
-            'cartItems' => $cartItems,
-            'subtotal' => $subtotal,
-            'voucherAmount' => $voucherAmount,
-            'total' => $total,
-        ]);
+        // Redirect ke halaman checkout
+        return redirect()->route('checkout');
     }
 
     public function validateVoucher(Request $request)
@@ -434,4 +410,58 @@ class CartController extends Controller
         }
     }
 
+    private function getApplicableDiscounts($productId, $categoryId)
+    {
+        $now = now();
+
+        return DB::table('discounts')
+            ->where(function ($query) use ($productId, $categoryId) {
+                $query->where('applicable_to', 'Semua') // Diskon untuk semua produk
+                    ->orWhere(function ($query) use ($productId) {
+                        $query->where('applicable_to', 'Product')
+                            ->whereJsonContains('applicable_ids', (string) $productId); // Pastikan productId dikonversi ke string
+                    })
+                    ->orWhere(function ($query) use ($categoryId) {
+                        $query->where('applicable_to', 'Category')
+                            ->whereJsonContains('applicable_ids', (string) $categoryId); // Pastikan categoryId dikonversi ke string
+                    });
+            })
+            ->where('start_date', '<=', $now) // Diskon aktif
+            ->where('end_date', '>=', $now) // Diskon belum kadaluarsa
+            ->get();
+    }
+
+    private function calculateDiscountedPrice($price, $discounts)
+    {
+        $discountedPrice = $price;
+
+        foreach ($discounts as $discount) {
+            $discountedPrice -= $discountedPrice * ($discount->discount_percentage / 100);
+        }
+
+        // Pastikan harga diskon tidak kurang dari 0
+        return max($discountedPrice, 0);
+    }
+
+    private function calculateTotalDiscount($discounts)
+    {
+        $totalDiscount = 0;
+
+        foreach ($discounts as $discount) {
+            $totalDiscount += $discount->discount_percentage;
+        }
+
+        return $totalDiscount;
+    }
+
+    private function formatDiscountDisplay($discounts)
+    {
+        $discountTexts = [];
+
+        foreach ($discounts as $discount) {
+            $discountTexts[] = $discount->discount_percentage . '%';
+        }
+
+        return implode(' + ', $discountTexts);
+    }
 }

@@ -518,9 +518,9 @@
                           <input
                               id="checkbox-{{ $type->category_id }}"
                               type="checkbox"
-                              value="{{ $type->category_slug }}" 
-                              class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                              onchange="updateFilter('{{ $type->category_slug }}')" 
+                              value="{{ $type->category_slug }}"
+                              class="w-4 h-4 text-pink-400 bg-gray-100 border-gray-300 rounded focus:ring-pink-300 dark:focus:ring-pink-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                              onchange="updateFilter('{{ $type->category_slug }}')"
                               {{ in_array($type->category_slug, explode(',', request('categories', ''))) ? 'checked' : '' }}
                           />
                           <span>{{ $type->category_name }}</span>

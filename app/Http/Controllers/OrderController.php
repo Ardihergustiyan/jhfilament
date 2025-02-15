@@ -40,8 +40,8 @@ class OrderController extends Controller
     {
         // Ambil order yang baru saja dibuat
         $order = Order::where('user_id', auth()->id())
-                      ->latest()
-                      ->first();
+                    ->latest()
+                    ->first();
 
         // Jika order ditemukan dan memiliki voucher_id
         if ($order && $order->voucher_id) {
@@ -54,5 +54,37 @@ class OrderController extends Controller
 
         // Tampilkan halaman sukses
         return view('payment.success');
+    }
+    private function getApplicableDiscounts($productId, $categoryId)
+    {
+        $now = now();
+
+        return DB::table('discounts')
+            ->where(function ($query) use ($productId, $categoryId) {
+                $query->where('applicable_to', 'Semua') // Diskon untuk semua produk
+                    ->orWhere(function ($query) use ($productId) {
+                        $query->where('applicable_to', 'Product')
+                            ->whereJsonContains('applicable_ids', (string) $productId); // Pastikan productId dikonversi ke string
+                    })
+                    ->orWhere(function ($query) use ($categoryId) {
+                        $query->where('applicable_to', 'Category')
+                            ->whereJsonContains('applicable_ids', (string) $categoryId); // Pastikan categoryId dikonversi ke string
+                    });
+            })
+            ->where('start_date', '<=', $now) // Diskon aktif
+            ->where('end_date', '>=', $now) // Diskon belum kadaluarsa
+            ->get();
+    }
+
+    private function calculateDiscountedPrice($price, $discounts)
+    {
+        $discountedPrice = $price;
+
+        foreach ($discounts as $discount) {
+            $discountedPrice -= $discountedPrice * ($discount->discount_percentage / 100);
+        }
+
+        // Pastikan harga diskon tidak kurang dari 0
+        return max($discountedPrice, 0);
     }
 }

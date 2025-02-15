@@ -43,6 +43,7 @@
             <p><strong>Shipping Method:</strong> {{ $order->shipping_method }}</p>
             <p><strong>Payment Method:</strong> {{ $order->payment->payment_method }}</p>
             <p><strong>Payment Status:</strong> {{ $order->payment->payment_status }}</p>
+            <p><strong>Notes:</strong>{{ $order->notes }}</p>
         </div>
 
         <!-- Items Table -->
@@ -78,8 +79,8 @@
             @if ($voucherAmount > 0)
                 <p class="text-gray-600">Voucher Discount: -Rp {{ number_format($voucherAmount, 0, ',', '.') }}</p>
             @endif
-            <p class="text-gray-600">Sales Tax (5%): Rp {{ number_format($total * 0.05, 0, ',', '.') }}</p>
-            <p class="font-bold text-lg">Invoice Total: Rp {{ number_format($total * 1.05, 0, ',', '.') }}</p>
+           
+            <p class="font-bold text-lg">Invoice Total: Rp {{ number_format($total, 0, ',', '.') }}</p>
         </div>
 
         <!-- Terms & Conditions -->

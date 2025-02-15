@@ -297,7 +297,7 @@
                               <td class="py-4 px-2 text-base font-normal text-gray-900 dark:text-white align-middle">x{{ $item->quantity }}</td>
                           
                               <td class="py-4 pl-2 pr-4 text-right text-base font-bold text-gray-900 dark:text-white align-middle">
-                                  Rp {{ number_format($item->final_price * $item->quantity, 0, ',', '.') }}
+                                  Rp{{ number_format($item->discounted_price ?? $item->final_price, 0, ',', '.') }}</p>
                               </td>
                           </tr>
                         @endforeach

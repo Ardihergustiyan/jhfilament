@@ -39,8 +39,8 @@
             <div class="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start xl:gap-8">
                 <div class="mx-auto w-full flex-none lg:max-w-2xl xl:max-w-4xl">
                     <div class="space-y-6 text-center py-16">
-
-                        <!-- Empty Cart Icon -->
+            
+                        <!-- Ikon Keranjang Kosong -->
                         <svg
                             class="mx-auto h-24 w-24 text-gray-400 dark:text-gray-500"
                             xmlns="http://www.w3.org/2000/svg"
@@ -53,26 +53,21 @@
                         >
                             <path d="M5 4h2l1 9h10l1-9h2M16 12v8M8 12v8M10 18h4" />
                         </svg>
-
-                        <!-- Empty Cart Text -->
-                        <h2
-                            class="mt-6 text-lg font-semibold text-gray-900 dark:text-white"
-                        >
-                            Your cart is currently empty
+            
+                        <!-- Teks Keranjang Kosong -->
+                        <h2 class="mt-6 text-lg font-semibold text-gray-900 dark:text-white">
+                            Keranjang Anda saat ini kosong
                         </h2>
-                        <p
-                            class="mt-2 text-base font-normal text-gray-500 dark:text-gray-400"
-                        >
-                            Looks like you haven't added any items to your cart yet. Start
-                            shopping now!
+                        <p class="mt-2 text-base font-normal text-gray-500 dark:text-gray-400">
+                            Sepertinya Anda belum menambahkan barang ke keranjang. Mulai belanja sekarang!
                         </p>
-
-                        <!-- Continue Shopping Button -->
+            
+                        <!-- Tombol Lanjut Belanja -->
                         <a
-                            href="#"
+                            href="/product" 
                             class="mt-6 inline-flex items-center justify-center rounded-lg bg-pink-400 px-6 py-3 text-sm font-medium text-white hover:bg-pink-500 focus:outline-none focus:ring-4 focus:ring-pink-200 dark:bg-pink-400 dark:hover:bg-pink-500 dark:focus:ring-pink-500"
                         >
-                            Continue Shopping
+                            Lanjut Belanja
                         </a>
                     </div>
                 </div>
@@ -125,7 +120,7 @@
                                         
                                     </div>
                                     <div class="text-end md:order-4 md:w-32">
-                                        <p class="text-base font-bold text-gray-900 dark:text-white">Rp{{ number_format($item->final_price, 0, ',', '.') }}</p>
+                                        <p class="text-base font-bold text-gray-900 dark:text-white"> Rp{{ number_format($item->discounted_price ?? $item->final_price, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
 
