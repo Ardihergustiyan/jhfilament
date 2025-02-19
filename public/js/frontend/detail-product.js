@@ -36,14 +36,20 @@ function showDetailTab(tab) {
     });
 
     // Show selected content and add active class to selected tab
-    if (tab === 'detail') {
-        document.getElementById('contentDetail').classList.remove('hidden');
-        document.getElementById('tabDetail').classList.add('bg-pink-600');
-    } else if (tab === 'ulasan') {
-        document.getElementById('contentUlasan').classList.remove('hidden');
-        document.getElementById('tabUlasan').classList.add('bg-pink-600');
+    const contentDetail = document.getElementById('contentDetail');
+    const tabDetail = document.getElementById('tabDetail');
+    const contentUlasan = document.getElementById('contentUlasan');
+    const tabUlasan = document.getElementById('tabUlasan');
+
+    if (tab === 'detail' && contentDetail && tabDetail) {
+        contentDetail.classList.remove('hidden');
+        tabDetail.classList.add('bg-pink-600');
+    } else if (tab === 'ulasan' && contentUlasan && tabUlasan) {
+        contentUlasan.classList.remove('hidden');
+        tabUlasan.classList.add('bg-pink-600');
     }
 }
+
 
 // Initialize with Detail Produk tab as active
 showDetailTab('ulasan');
@@ -109,6 +115,8 @@ function showVariant(images, stock, buttonElement) {
 document.addEventListener("DOMContentLoaded", function () {
     const image = document.getElementById("main-image");
 
+    if (!image) return; // Jika elemen tidak ditemukan, hentikan script
+
     image.addEventListener("mousemove", function (event) {
         let rect = image.getBoundingClientRect();
         let x = (event.clientX - rect.left) / rect.width * 100;
@@ -122,3 +130,4 @@ document.addEventListener("DOMContentLoaded", function () {
         image.style.transform = "scale(1)";
     });
 });
+
