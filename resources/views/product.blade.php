@@ -255,178 +255,40 @@
                 </div>
             </div>
         @endforeach
-    
-    <!-- Modal Container -->
-    <div id="customModal" class="hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-gray-800 bg-opacity-50">
-        <div class="relative p-4 w-full max-w-md max-h-full bg-white rounded-lg shadow-lg dark:bg-gray-800">
-            <div class="p-4 md:p-5">
-                <div class="flex flex-col items-center text-center">
-                    <div class="w-12 h-12 mb-4 text-pink-500 dark:text-pink-400">
-                        <svg class="w-full h-full" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                        </svg>
-                    </div>
-                    <h3 id="modalTitle" class="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-                        Anda belum memilih warna!
-                    </h3>
-                    <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-                        Silakan pilih warna produk terlebih dahulu sebelum menambahkan ke keranjang.
-                    </p>
-                    <div class="flex items-center justify-center gap-3">
-                        <a id="modalDetailLink" href="#" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white bg-pink-500 hover:bg-pink-600 focus:ring-4 focus:ring-pink-300 rounded-lg dark:bg-pink-600 dark:hover:bg-pink-700 dark:focus:ring-pink-800">
-                            <svg class="w-4 h-4 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-4 4V6a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v5m4 0v5m4-5v5m-8-5v5m4-5v5M4 6v13c0 1.1.9 2 2 2h13c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2Z"/>
+            <!-- Modal Container -->
+        <div id="customModal" class="hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-gray-800 bg-opacity-50">
+            <div class="relative p-4 w-full max-w-md max-h-full bg-white rounded-lg shadow-lg dark:bg-gray-800">
+                <div class="p-4 md:p-5">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 mb-4 text-pink-500 dark:text-pink-400">
+                            <svg class="w-full h-full" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                             </svg>
-                            Lihat Detail
-                        </a>
-                        <button id="closeModalButton" type="button" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-pink-700 focus:z-10 focus:ring-4 focus:ring-gray-100 rounded-lg dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700">
-                            Tutup
-                        </button>
+                        </div>
+                        <h3 id="modalTitle" class="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
+                            Anda belum memilih !
+                        </h3>
+                        <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+                            Silakan pilih warna produk terlebih dahulu sebelum menambahkan ke keranjang.
+                        </p>
+                        <div class="flex items-center justify-center gap-3">
+                            <a id="modalDetailLink" href="#" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white bg-pink-500 hover:bg-pink-600 focus:ring-4 focus:ring-pink-300 rounded-lg dark:bg-pink-600 dark:hover:bg-pink-700 dark:focus:ring-pink-800">
+                                <svg class="w-4 h-4 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-4 4V6a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v5m4 0v5m4-5v5m-8-5v5m4-5v5M4 6v13c0 1.1.9 2 2 2h13c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2Z"/>
+                                </svg>
+                                Lihat Detail
+                            </a>
+                            <button id="closeModalButton" type="button" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-pink-700 focus:z-10 focus:ring-4 focus:ring-gray-100 rounded-lg dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700">
+                                Tutup
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <script>
-        function openModal(productName, productLink) {
-            document.getElementById('modalTitle').innerText = `Anda belum memilih warna untuk ${productName}!`;
-            document.getElementById('modalDetailLink').href = productLink;
-            document.getElementById('customModal').classList.remove('hidden');
-        }
-    
-        function closeModal() {
-            document.getElementById('customModal').classList.add('hidden');
-        }
-    
-        document.getElementById('closeModalButton').addEventListener('click', closeModal);
-    </script>
         @endif
-      
-        
       </div>
-      <script>
-            function addToCart(productId) {
-              fetch('{{ route('cart.add') }}', {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json',
-                      'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                  },
-                  body: JSON.stringify({
-                      product_id: productId,
-                      quantity: 1 // Tambahkan nilai default quantity
-                  }),
-              })
-              .then(response => response.json())
-              .then(data => {
-                  alert(data.message); // Tampilkan notifikasi
-                  updateCartItemCount(); // Perbarui jumlah item di ikon cart
-              })
-              .catch(error => console.error('Error:', error));
-          }
-        </script>
-
-      <script>
-          // function handleAddToCart(productId, hasVariant) {
-          //     if (hasVariant === 'true') {
-          //         // Tampilkan modal jika produk memiliki varian
-          //         const modal = document.getElementById(`popup-modal-${productId}`);
-          //         if (modal) {
-          //             modal.classList.remove('hidden');
-          //         }
-          //     } else {
-          //         // Tambahkan produk langsung ke keranjang
-          //         addToCart(productId);
-          //     }
-          // }
-
-          // document.querySelectorAll('[data-modal-hide]').forEach(button => {
-          //     button.addEventListener('click', function () {
-          //         const modalId = this.getAttribute('data-modal-hide');
-          //         const modal = document.getElementById(modalId);
-          //         if (modal) {
-          //             modal.classList.add('hidden'); // Sembunyikan modal
-          //         }
-          //     });
-          // });
-
-          // function addToCart(productId) {
-          //     fetch('{{ route('cart.add') }}', {
-          //         method: 'POST',
-          //         headers: {
-          //             'Content-Type': 'application/json',
-          //             'X-CSRF-TOKEN': '{{ csrf_token() }}',
-          //         },
-          //         body: JSON.stringify({ product_id: productId }),
-          //     })
-          //     .then(response => response.json())
-          //     .then(data => {
-          //         alert(data.message); // Tampilkan notifikasi
-          //         updateCartItemCount(); // Perbarui jumlah item di ikon cart
-          //     })
-          //     .catch(error => console.error('Error:', error));
-          // }
-
-          //           function handleAddToCart(productId, hasVariant) {
-          //     if (hasVariant === 'true') {
-          //         // Tampilkan modal jika produk memiliki varian
-          //         const modal = document.getElementById(`popup-modal-${productId}`);
-          //         if (modal) {
-          //             modal.classList.remove('hidden');
-          //         }
-          //     } else {
-          //         // Tambahkan produk langsung ke keranjang
-          //         addToCart(productId);
-          //     }
-          // }
-
-          // function addToCart(productId) {
-          //     fetch('{{ route('cart.add') }}', {
-          //         method: 'POST',
-          //         headers: {
-          //             'Content-Type': 'application/json',
-          //             'X-CSRF-TOKEN': '{{ csrf_token() }}',
-          //         },
-          //         body: JSON.stringify({ product_id: productId }),
-          //     })
-          //     .then(response => response.json())
-          //     .then(data => {
-          //         alert(data.message); // Tampilkan notifikasi
-          //         updateCartItemCount(); // Perbarui jumlah item di ikon cart
-          //     })
-          //     .catch(error => console.error('Error:', error));
-          // }
-
-          
-
-      </script>
       {{-- end main --}}
-
-      {{-- show more --}}
-      {{-- @if ($hasMorePages)
-        <div class="w-full text-center">
-            <button
-              id="loadMoreButton"
-              type="button"
-              class="rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
-            >
-              Show more
-            </button>
-        </div>
-      @endif --}}
-      {{-- end show more --}}
-      <div id="loadingIndicator" class="hidden w-full text-center py-4">
-        <div class="text-center">
-          <div role="status">
-              <svg aria-hidden="true" class="inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-pink-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-                  <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
-              </svg>
-              <span class="sr-only">Loading...</span>
-          </div>
-        </div>
-      </div>
     </div>
     {{-- filter --}}
     <div id="filterSidebar" class="hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 w-3/4 md:w-1/3 max-w-screen-md bg-white rounded-lg shadow-2xl max-h-screen overflow-y-auto z-50 scrollbar-thin">
@@ -625,58 +487,41 @@
       }
   });
 
-  let isLoading = false;
-let currentPage = 1;
 
-window.addEventListener('scroll', function () {
-    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-
-    if (scrollTop + clientHeight >= scrollHeight - 100 && !isLoading) {
-        isLoading = true;
-        currentPage++;
-
-        // Tampilkan indikator loading
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        if (loadingIndicator) {
-            loadingIndicator.classList.remove('hidden');
-        }
-
-        fetch(`?page=${currentPage}`, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.text())
-        .then(html => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const newProducts = doc.querySelectorAll('.product-item');
-
-            const productContainer = document.getElementById('productList');
-            newProducts.forEach(product => {
-                productContainer.appendChild(product);
-            });
-
-            // Hentikan infinite scroll jika tidak ada produk baru
-            if (newProducts.length === 0) {
-                window.removeEventListener('scroll', arguments.callee);
-            }
-        })
-        .catch(error => {
-            console.error('Error loading more products:', error);
-        })
-        .finally(() => {
-            // Sembunyikan indikator loading
-            if (loadingIndicator) {
-                loadingIndicator.classList.add('hidden');
-            }
-            isLoading = false;
-        });
+  function openModal(productName, productLink) {
+        document.getElementById('modalTitle').innerText = `Anda belum memilih warna untuk ${productName}!`;
+        document.getElementById('modalDetailLink').href = productLink;
+        document.getElementById('customModal').classList.remove('hidden');
     }
-});
 
+    function closeModal() {
+        document.getElementById('customModal').classList.add('hidden');
+    }
+
+    document.getElementById('closeModalButton').addEventListener('click', closeModal);
+
+
+    function addToCart(productId) {
+              fetch('{{ route('cart.add') }}', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                  },
+                  body: JSON.stringify({
+                      product_id: productId,
+                      quantity: 1 // Tambahkan nilai default quantity
+                  }),
+              })
+              .then(response => response.json())
+              .then(data => {
+                  alert(data.message); // Tampilkan notifikasi
+                  updateCartItemCount(); // Perbarui jumlah item di ikon cart
+              })
+              .catch(error => console.error('Error:', error));
+          }
 </script>
-
+<script src="{{ asset('js/frontend/product.js') }}"></script>
 
 
 @include('layouts.footer')

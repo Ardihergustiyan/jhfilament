@@ -7,6 +7,7 @@
         </div>
     </div>
     <!-- end marquee -->
+
     {{-- navbar --}}
     @include('components.navbar')
     {{-- end navbar --}}
@@ -395,16 +396,6 @@
         <div class="swiper-container3 overflow-hidden w-full">
           <!-- Added overflow-hidden here -->
           <div class="swiper-wrapper">
-            {{-- @foreach ($mostReviewedProducts as $product) 
-          <div>
-      
-              <img src="{{ asset('storage/' . $product->main_image) }}" alt="{{ $product->name }}" />
-              <h3>{{ $product->name }}</h3>
-              <p>Harga: Rp{{ number_format($product->het_price) }}</p>
-              <p>Terjual: {{ $product->total_quantity }} item</p>
-              <p>Rating: {{ number_format($product->average_rating, 1) }} ({{ $product->total_reviews }} ulasan)</p>
-          </div>
-          @endforeach --}}
             @foreach($mostReviewedProducts as $product)
               @include('components.card', ['product' => $product])
             @endforeach
@@ -450,9 +441,11 @@
               </form>
           </div>
       </div>
-  </div>
+    </div>
     {{-- end banner  --}}
 
+  
+    
     
 @include('components.features')
 @include('layouts.footer')

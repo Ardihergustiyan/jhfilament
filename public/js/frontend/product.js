@@ -206,18 +206,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const sliderMax = document.getElementById('slider-max');
     const rangeResultMin = document.getElementById('rangeResultMin');
     const rangeResultMax = document.getElementById('rangeResultMax');
-    const applyFilterButton = document.getElementById('apply-price-filter');
 
     // Validasi elemen ada di DOM
-    if (!sliderMin || !sliderMax || !rangeResultMin || !rangeResultMax || !applyFilterButton) {
+    if (!sliderMin || !sliderMax || !rangeResultMin || !rangeResultMax) {
         console.error("Slider or filter elements not found in DOM.");
         return;
     }
 
     // Fungsi untuk memperbarui tampilan harga
     const updatePriceDisplay = () => {
-        const minPrice = parseInt(sliderMin.value, 10); // Ambil nilai dari slider min
-        const maxPrice = parseInt(sliderMax.value, 10); // Ambil nilai dari slider max
+        const minPrice = parseInt(sliderMin.value, 10); 
+        const maxPrice = parseInt(sliderMax.value, 10); 
 
         rangeResultMin.textContent = minPrice.toLocaleString("id-ID");
         rangeResultMax.textContent = maxPrice.toLocaleString("id-ID");
@@ -238,7 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Tambahkan event listener untuk slider dan tombol filter
     sliderMin.addEventListener('input', updatePriceDisplay);
     sliderMax.addEventListener('input', updatePriceDisplay);
-    applyFilterButton.addEventListener('click', applyPriceFilter);
 
     // Perbarui tampilan awal
     updatePriceDisplay();
