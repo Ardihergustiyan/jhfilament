@@ -311,25 +311,37 @@
 </section>
 
 <script>
-  document.querySelector('form').addEventListener('submit', function(event) {
+  document.querySelector('form').addEventListener('submit', function (event) {
       const phoneInput = document.getElementById('phone-input');
       const paymentMethod = document.querySelector('input[name="payment-method"]:checked');
       const deliveryMethod = document.querySelector('input[name="delivery-method"]:checked');
-  
+
       if (!phoneInput.value) {
-          alert('Nomor HP wajib diisi!');
+          Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Nomor HP wajib diisi!',
+          });
           event.preventDefault();
           return;
       }
-  
+
       if (!paymentMethod) {
-          alert('Pilih metode pembayaran!');
+          Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Pilih metode pembayaran!',
+          });
           event.preventDefault();
           return;
       }
-  
+
       if (!deliveryMethod) {
-          alert('Pilih metode pengiriman!');
+          Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Pilih metode pengiriman!',
+          });
           event.preventDefault();
           return;
       }

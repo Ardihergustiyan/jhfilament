@@ -115,21 +115,22 @@
     </div>
   </div>
   
-  <script>
+
+<script>
     function addToCart(productId) {
         const addToCartButton = document.querySelector(`button[data-product-id="${productId}"]`);
         const hasVariants = addToCartButton.getAttribute('data-has-variants') === 'true';
         const variantId = addToCartButton.getAttribute('data-variant-id');
-  
+
         const requestData = {
             product_id: productId,
             quantity: 1,
         };
-  
+
         if (hasVariants && variantId) {
             requestData.variant_id = variantId;
         }
-  
+
         fetch('{{ route('cart.add') }}', {
             method: 'POST',
             headers: {
@@ -147,12 +148,20 @@
             return response.json();
         })
         .then(data => {
-            alert(data.message);
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: data.message,
+            });
             updateCartItemCount();
         })
         .catch(error => {
             console.error('Error:', error);
-            alert(error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.message,
+            });
         });
     }
-  </script>
+</script>

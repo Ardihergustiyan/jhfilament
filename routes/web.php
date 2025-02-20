@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
@@ -25,6 +26,17 @@ use Symfony\Component\HttpKernel\Profiler\Profile;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+// // admin
+// Route::get('admin', function () {
+//     return response()->view('errors.404', [], 404);
+// })->middleware(['auth', 'verified', 'role:Admin']);
+
+// Route::prefix('admin')->group(function () {
+//     Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+//     Route::post('/login', [AdminAuthController::class, 'login']);
+//     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
+// });
 
 
 // Authentication Routes
@@ -67,6 +79,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/proceed-to-checkout', [CartController::class, 'proceedToCheckout'])->name('cart.proceed-to-checkout');
     Route::post('/cart/update-session', [CartController::class, 'updateSession'])->name('cart.update-session');
     Route::post('/validate-voucher', [CartController::class, 'validateVoucher'])->name('validateVoucher');
+    Route::get('/cart', [CartController::class, 'index'])->name('cart');
 });
 
 // Route::get('/cart', [CartController::class, 'index'])->middleware('auth')->name('cart.index');
@@ -104,8 +117,8 @@ Route::get('/about', function () {
     return view('about');
 });
 
-Route::get('/thank-you/{order_id}', [OrderController::class, 'thankyou'])
-     ->name('order.thankyou');
+Route::get('/order-detail/{order_id}', [OrderController::class, 'orderDetail'])
+     ->name('order.order-detail');
 Route::get('/payment/success', [OrderController::class, 'success'])->name('payment.success');
 
 // Route::get('/profile/{first_name}', [ProfileController::class, 'show'])

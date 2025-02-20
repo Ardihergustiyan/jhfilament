@@ -265,7 +265,11 @@
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success) {
-                                    alert('Varian berhasil diperbarui!');
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Berhasil!',
+                                        text: 'Varian berhasil diperbarui!',
+                                    });
 
                                     // Perbarui gambar produk secara dinamis
                                     const selectedOption = selectElement.options[selectElement.selectedIndex];
@@ -280,12 +284,20 @@
                                         }
                                     }
                                 } else {
-                                    alert('Gagal memperbarui varian. ' + (data.message || ''));
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Gagal!',
+                                        text: 'Gagal memperbarui varian. ' + (data.message || ''),
+                                    });
                                 }
                             })
                             .catch(error => {
                                 console.error('Error:', error);
-                                alert('Terjadi kesalahan saat memperbarui varian.');
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Oops...',
+                                    text: 'Terjadi kesalahan saat memperbarui varian.',
+                                });
                             });
                         }
 
@@ -323,13 +335,21 @@
                                     // Memuat ulang halaman untuk memastikan data terbaru
                                     location.reload();
                                 } else {
-                                    alert('Gagal memperbarui jumlah. ' + (data.message || ''));
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Gagal!',
+                                        text: 'Gagal memperbarui jumlah. ' + (data.message || ''),
+                                    });
                                     window.location.reload(); // Refresh halaman
                                 }
                             })
                             .catch(error => {
                                 console.error('Error:', error);
-                                alert('Terjadi kesalahan saat memperbarui jumlah.');
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Oops...',
+                                    text: 'Terjadi kesalahan saat memperbarui jumlah.',
+                                });
                             });
                         }
 
@@ -352,37 +372,6 @@
                                 totalDisplay.textContent = `Rp ${new Intl.NumberFormat('id-ID').format(total)}`;
                             }
                         }
-
-                        // function updateCartSummaryWithVoucher(voucherPercentage) {
-                        //     // Ambil data terbaru dari server
-                        //     fetch('/cart/data') // Buat endpoint untuk mengambil data cart terbaru
-                        //         .then(response => response.json())
-                        //         .then(data => {
-                        //             const subtotal = data.subtotal;
-                        //             const voucherAmount = (subtotal * voucherPercentage) / 100;
-                        //             const total = subtotal - voucherAmount;
-
-                        //             // Perbarui tampilan
-                        //             updateCartSummary(subtotal, voucherAmount, total);
-                        //         })
-                        //         .catch(error => console.error('Error:', error));
-                        // }
-                        
-                        // function updateCartSummaryWithVoucher(voucherPercentage) {
-                        //     const subtotalDisplay = document.getElementById("subtotal-display");
-                        //     const totalDisplay = document.getElementById("total-display");
-                        //     const voucherDisplay = document.getElementById("voucher-display");
-
-                        //     if (subtotalDisplay && totalDisplay && voucherDisplay) {
-                        //         const subtotal = parseFloat(subtotalDisplay.textContent.replace(/[^0-9]/g, "")) || 0;
-                        //         const voucherAmount = (subtotal * voucherPercentage) / 100;
-                        //         const total = subtotal - voucherAmount;
-
-                        //         // Perbarui tampilan voucher dan total
-                        //         voucherDisplay.textContent = `-Rp ${new Intl.NumberFormat("id-ID").format(voucherAmount)}`;
-                        //         totalDisplay.textContent = `Rp ${new Intl.NumberFormat("id-ID").format(total)}`;
-                        //     }
-                        // }
 
                         function updateCartSummaryWithVoucher(voucherPercentage, useServerData = false) {
                             if (useServerData) {
@@ -502,11 +491,23 @@
                             .then(response => response.json())
                             .then(data => {
                                 if (data.message) {
-                                    alert(data.message);
-                                    location.reload();
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Berhasil!',
+                                        text: data.message,
+                                    }).then(() => {
+                                        location.reload();
+                                    });
                                 }
                             })
-                            .catch(error => console.error('Error:', error));
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Oops...',
+                                    text: 'Terjadi kesalahan saat menghapus item dari keranjang.',
+                                });
+                            });
                         }
 
                         document.addEventListener("DOMContentLoaded", function () {
@@ -545,11 +546,23 @@
 
                                             // Perbarui subtotal, voucher, dan total
                                             updateCartSummaryWithVoucher(data.voucher);
+                                             // Tampilkan SweetAlert2 untuk pesan sukses
+                                            Swal.fire({
+                                                icon: 'success',
+                                                title: 'Berhasil!',
+                                                text: 'Voucher berhasil diterapkan!',
+                                            });
                                         } else {
                                             // Jika voucher tidak valid, tampilkan pesan error
                                             voucherMessage.textContent = data.message || "Voucher tidak valid.";
                                             voucherMessage.classList.remove("text-green-600");
                                             voucherMessage.classList.add("text-red-600");
+                                            // Tampilkan SweetAlert2 untuk pesan error
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'Gagal!',
+                                                text: data.message || "Voucher tidak valid.",
+                                            });
                                         }
                                     })
                                     .catch(error => {
@@ -557,6 +570,13 @@
                                         voucherMessage.textContent = "Terjadi kesalahan saat memvalidasi voucher.";
                                         voucherMessage.classList.remove("text-green-600");
                                         voucherMessage.classList.add("text-red-600");
+
+                                        // Tampilkan SweetAlert2 untuk kesalahan umum
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Oops...',
+                                            text: 'Terjadi kesalahan saat memvalidasi voucher.',
+                                        });
                                     });
                                 });
                             }

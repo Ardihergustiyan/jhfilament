@@ -19,8 +19,6 @@ class ResellerLevelsTableSeeder extends Seeder
             ['name' => 'Bronze', 'slug' => Str::slug('bronze')],
             ['name' => 'Silver', 'slug' => Str::slug('silver')],
             ['name' => 'Gold', 'slug' => Str::slug('gold')],
-            ['name' => 'Diamond', 'slug' => Str::slug('diamond')],
-            ['name' => 'Jade', 'slug' => Str::slug('jade')],
         ];
 
         foreach ($resellerLevels as $level) {
