@@ -245,6 +245,26 @@ class CheckoutController extends Controller
             if ($cartItems->isEmpty()) {
                 return redirect()->route('cart')->with('error', 'Keranjang Anda kosong.');
             }
+            // Periksa stok sebelum melanjutkan
+            foreach ($cartItems as $item) {
+                if ($item->variant_id) {
+                    $variant = ProductVariant::find($item->variant_id);
+                    if ($variant && $variant->stock < $item->quantity) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Stok varian ' . $variant->color . ' tidak mencukupi.',
+                        ], 400);
+                    }
+                } else {
+                    $product = Product::find($item->product_id);
+                    if ($product && $product->stock < $item->quantity) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Stok produk ' . $product->name . ' tidak mencukupi.',
+                        ], 400);
+                    }
+                }
+            }
 
             // Hitung diskon untuk setiap item di keranjang
             foreach ($cartItems as $cartItem) {
@@ -317,17 +337,11 @@ class CheckoutController extends Controller
                 if ($item->variant_id) {
                     $variant = ProductVariant::find($item->variant_id);
                     if ($variant) {
-                        if ($variant->stock < $item->quantity) {
-                            throw new \Exception('Stok varian ' . $variant->color . ' tidak mencukupi.');
-                        }
                         $variant->decrement('stock', $item->quantity);
                     }
                 } else {
                     $product = Product::find($item->product_id);
                     if ($product) {
-                        if ($product->stock < $item->quantity) {
-                            throw new \Exception('Stok produk ' . $product->name . ' tidak mencukupi.');
-                        }
                         $product->decrement('stock', $item->quantity);
                     }
                 }
@@ -348,7 +362,7 @@ class CheckoutController extends Controller
             DB::commit();
 
             // Redirect ke halaman terima kasih
-            return redirect()->route('order.thankyou', ['order_id' => $order->id])
+            return redirect()->route('order.order-detail', ['order_id' => $order->id])
                     ->with('success', 'Order berhasil dibuat!');
         } catch (\Exception $e) {
             // Rollback transaction jika ada error

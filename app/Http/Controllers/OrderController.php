@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Session;
 
 class OrderController extends Controller
 {
-    public function thankyou($order_id)
+    public function orderDetail($order_id)
     {
         // Ambil data order beserta relasinya
         $order = Order::with(['user', 'orderItems.product', 'orderItems.productVariant', 'payment', 'status'])
@@ -33,7 +33,7 @@ class OrderController extends Controller
         $total = $subtotal - $voucherAmount;
 
         // Kirim data ke view
-        return view('thankyou', compact('order', 'subtotal', 'voucherAmount', 'total'));
+        return view('order-detail', compact('order', 'subtotal', 'voucherAmount', 'total'));
     }
 
     public function success(Request $request)

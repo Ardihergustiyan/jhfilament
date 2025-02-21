@@ -13,7 +13,7 @@ class RolePolicy
      */
     public function viewAny(User $user)
     {
-        return $user->hasRole(['Admin','Reseller']);
+        return $user->hasRole(['Admin']);
     }
 
     /**
