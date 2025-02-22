@@ -43,7 +43,7 @@
             <p><strong>Shipping Method:</strong> {{ $order->shipping_method }}</p>
             <p><strong>Payment Method:</strong> {{ $order->payment->payment_method }}</p>
             <p><strong>Payment Status:</strong> {{ $order->payment->payment_status }}</p>
-            <p><strong>Notes:</strong>{{ $order->notes }}</p>
+            <p><strong>Notes:</strong> {{ $order->notes }}</p>
         </div>
 
         <!-- Items Table -->
@@ -79,17 +79,45 @@
             @if ($voucherAmount > 0)
                 <p class="text-gray-600">Voucher Discount: -Rp {{ number_format($voucherAmount, 0, ',', '.') }}</p>
             @endif
-           
+            {{-- <p class="text-gray-600">Biaya Admin: Rp {{ number_format($adminFee, 0, ',', '.') }}</p> --}}
             <p class="font-bold text-lg">Invoice Total: Rp {{ number_format($total, 0, ',', '.') }}</p>
         </div>
+
+        <!-- Payment Instructions -->
+        @if ($order->payment->payment_status === 'pending')
+        <div class="mt-8">
+            <h2 class="font-bold text-lg">Instruksi Pembayaran</h2>
+            <p class="text-gray-600">Silakan selesaikan pembayaran Anda menggunakan metode berikut:</p>
+            <p class="text-gray-600">Bank: {{ $order->payment->bank_name }}</p>
+            <p class="text-gray-600">Nomor VA: {{ $order->payment->va_number }}</p>
+            <p class="text-gray-600">Batas Waktu Pembayaran: {{ $order->payment->expiry_date }}</p>
+            <div class="mt-4 text-center">
+                <a href="{{ $order->payment->payment_url }}" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Lanjutkan Pembayaran</a>
+            </div>
+        </div>
+        @endif
+
+        <!-- Payment Notification -->
+        @if ($order->payment->payment_status === 'settlement')
+        <div class="mt-8 bg-green-100 p-4 rounded-lg">
+            <p class="text-green-700">Pembayaran Anda telah berhasil diproses. Terima kasih!</p>
+        </div>
+        @elseif ($order->payment->payment_status === 'pending')
+        <div class="mt-8 bg-yellow-100 p-4 rounded-lg">
+            <p class="text-yellow-700">Pembayaran Anda masih pending. Silakan selesaikan pembayaran sebelum batas waktu.</p>
+        </div>
+        @elseif ($order->payment->payment_status === 'expire')
+        <div class="mt-8 bg-red-100 p-4 rounded-lg">
+            <p class="text-red-700">Pembayaran Anda telah kedaluwarsa. Silakan lakukan pemesanan ulang.</p>
+        </div>
+        @endif
 
         <!-- Terms & Conditions -->
         <div class="mt-8">
             <h2 class="font-bold text-lg">Terms & Conditions</h2>
-            <p class="text-gray-600">Payment is due within 15 days</p>
-            <p class="text-gray-600">Name of Bank: Your Bank Name</p>
-            <p class="text-gray-600">Account number: 1234567890</p>
-            <p class="text-gray-600">Routing: 098765432</p>
+            <p class="text-gray-600">Pembayaran harus diselesaikan sebelum batas waktu yang ditentukan.</p>
+            <p class="text-gray-600">Pembayaran yang terlambat akan menyebabkan pesanan dibatalkan secara otomatis.</p>
+            <p class="text-gray-600">Jika Anda memiliki pertanyaan, silakan hubungi kami di support@example.com.</p>
         </div>
     </div>
 </body>

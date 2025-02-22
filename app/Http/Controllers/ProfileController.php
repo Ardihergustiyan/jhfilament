@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderStatus;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\ProductVariant;
@@ -21,201 +22,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
-    // public function show($first_name)
-    // {
-    //     $user = Auth::user(); // Ambil user yang login
-
-    //     //Ambil level resellerd dari user yang login
-    //     $resellerLevel = $user->resellerLevel->name ?? 'Regular User';
-
-    //     // Awal & akhir bulan ini
-    //     $startOfMonth = Carbon::now()->startOfMonth();
-    //     $endOfMonth = Carbon::now()->endOfMonth();
     
-    //     // Awal & akhir bulan lalu
-    //     $startOfLastMonth = Carbon::now()->subMonth()->startOfMonth();
-    //     $endOfLastMonth = Carbon::now()->subMonth()->endOfMonth();
-    
-    //     // Total pesanan selesai bulan ini
-    //     $totalOrdersThisMonth = Order::where('user_id', $user->id)
-    //         ->where('status_id', 3)
-    //         ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-    //         ->count();
-    
-    //     // Total pesanan selesai bulan lalu
-    //     $totalOrdersLastMonth = Order::where('user_id', $user->id)
-    //         ->where('status_id', 3)
-    //         ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
-    //         ->count();
-
-    //     // Hitung persentase perubahan jumlah pesanan
-    //     $orderPercentageChange = 0;
-    //     if ($totalOrdersLastMonth > 0) {
-    //         $orderPercentageChange = (($totalOrdersThisMonth - $totalOrdersLastMonth) / $totalOrdersLastMonth) * 100;
-    //     } elseif ($totalOrdersThisMonth > 0) {
-    //         $orderPercentageChange = 100; // Jika bulan lalu 0 dan bulan ini ada pesanan
-    //     }
-
-    //     // Total belanja bulan ini
-    //     $totalSpentThisMonth = Order::where('user_id', $user->id)
-    //         ->where('status_id', 3)
-    //         ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-    //         ->sum('total_price');
-
-    //     // Total belanja bulan lalu
-    //     $totalSpentLastMonth = Order::where('user_id', $user->id)
-    //         ->where('status_id', 3)
-    //         ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
-    //         ->sum('total_price');
-
-    //     // Hitung persentase perubahan total belanja
-    //     $spendingPercentageChange = 0;
-    //     if ($totalSpentLastMonth > 0) {
-    //         $spendingPercentageChange = (($totalSpentThisMonth - $totalSpentLastMonth) / $totalSpentLastMonth) * 100;
-    //     } elseif ($totalSpentThisMonth > 0) {
-    //         $spendingPercentageChange = 100; // Jika bulan lalu tidak ada belanja dan sekarang ada
-    //     }
-
-    //     // Ambil jumlah review bulan ini
-    //     $totalReviewsThisMonth = ProductReview::where('user_id', $user->id)
-    //         ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-    //         ->count();
-
-    //     // Ambil jumlah review bulan lalu
-    //     $totalReviewsLastMonth = ProductReview::where('user_id', $user->id)
-    //         ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
-    //         ->count();
-
-    //     // Hitung persentase perubahan jumlah review
-    //     $reviewPercentageChange = 0;
-    //     if ($totalReviewsLastMonth > 0) {
-    //         $reviewPercentageChange = (($totalReviewsThisMonth - $totalReviewsLastMonth) / $totalReviewsLastMonth) * 100;
-    //     } elseif ($totalReviewsThisMonth > 0) {
-    //         $reviewPercentageChange = 100;
-    //     }
-        
-    //     // Format angka ke rb/jt
-    //     $formattedThisMonth = $this->formatRupiah($totalSpentThisMonth);
-    //     $formattedLastMonth = $this->formatRupiah($totalSpentLastMonth);
-
-    //     // Ambil semua orders berdasarkan user yang login
-    //     $orders = Order::where('user_id', $user->id)->latest()->get();
-        
-    //     // Daftar level dan syarat minimal pembelian untuk upgrade
-    //     $levelRequirements = [
-    //         1 => 500000,    // Ruby
-    //         2 => 1000000,   // Bronze
-    //         3 => 10000000,  // Silver
-    //         4 => 50000000,  // Gold
-    //     ];
-
-    //     $currentLevelId = $user->reseller_level_id;
-    //     $progressPercentage = 0;
-    //     $nextLevelRequirement = 0;
-    //     $currentSpent = $totalSpentThisMonth; // Total belanja bulan ini
-
-    //     // Cek apakah user masih bisa naik level
-    //     if (isset($levelRequirements[$currentLevelId])) {
-    //         $nextLevelRequirement = $levelRequirements[$currentLevelId];
-
-    //         // Hitung progress dalam persen, maksimal 100%
-    //         $progressPercentage = min(100, ($currentSpent / $nextLevelRequirement) * 100);
-    //     }
-
-    //     // Format nilai rupiah
-    //     $formattedSpent = number_format($currentSpent, 0, ',', '.');
-    //     $formattedTarget = number_format($nextLevelRequirement, 0, ',', '.');
-
-    //     return view('profile', compact(
-    //         'user', 
-    //         'orders', 
-    //         'totalOrdersThisMonth', 
-    //         'totalOrdersLastMonth', 
-    //         'orderPercentageChange', 
-    //         'formattedThisMonth', 
-    //         'formattedLastMonth', 
-    //         'spendingPercentageChange', 
-    //         'totalReviewsThisMonth', 
-    //         'totalReviewsLastMonth', 
-    //         'reviewPercentageChange',
-    //         'resellerLevel',
-    //         'progressPercentage',
-    //         'formattedSpent',
-    //         'formattedTarget'
-    //     ));
-
-    // }
-    
-
-    // public function getProgressData()
-    // {
-    //     $user = Auth::user();
-
-    //     if (!$user) {
-    //         return response()->json(['error' => 'User not authenticated'], 401);
-    //     }
-
-    //     // Ambil total belanja bulan ini
-    //     $startOfMonth = Carbon::now()->startOfMonth();
-    //     $endOfMonth = Carbon::now()->endOfMonth();
-    //     $totalSpentThisMonth = Order::where('user_id', $user->id)
-    //         ->where('status_id', 3)
-    //         ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-    //         ->sum('total_price');
-
-    //     // Daftar level & syarat upgrade
-    //     $levelRequirements = [
-    //         1 => 500000,    // Ruby
-    //         2 => 1000000,   // Bronze
-    //         3 => 10000000,  // Silver
-    //         4 => 50000000,  // Gold
-    //     ];
-
-    //     // Ambil nama level saat ini dari database
-    //     $currentLevelName = $user->resellerLevel->name ?? 'Regular User';
-
-    //     // Cari level berikutnya
-    //     $currentLevelId = $user->reseller_level_id;
-    //     $nextLevelRequirement = $levelRequirements[$currentLevelId] ?? null;
-        
-    //     // Ambil nama level berikutnya dari database
-    //     $nextLevel = \App\Models\ResellerLevel::where('id', '>', $currentLevelId)
-    //         ->orderBy('id')
-    //         ->first();
-    //     $nextLevelName = $nextLevel->name ?? 'Jade';
-
-    //     if (!$nextLevelRequirement) {
-    //         return response()->json([
-    //             'error' => 'Anda sudah di level tertinggi',
-    //             'progressPercentage' => number_format(100, 2),
-    //             'currentSpent' => number_format($totalSpentThisMonth, 0, ',', '.'),
-    //             'target' => number_format($totalSpentThisMonth, 0, ',', '.'), // Target sudah tercapai
-    //             'remainingAmount' => '0',
-    //             'currentLevel' => $currentLevelName,
-    //             'nextLevel' => $nextLevelName,
-    //         ], 400);
-    //     }
-
-    //     // Hitung progress dalam persen, maksimal 100%
-    //     $progressPercentage = min(100, ($totalSpentThisMonth / $nextLevelRequirement) * 100);
-        
-    //     // Hitung sisa yang perlu dibelanjakan untuk naik level berikutnya
-    //     $remainingAmount = max(0, $nextLevelRequirement - $totalSpentThisMonth);
-    //     $readyForUpgrade = $totalSpentThisMonth >= $nextLevelRequirement; // Cek apakah sudah memenuhi syarat
-    //     $daysLeftInMonth = Carbon::now()->diffInDays($endOfMonth) + 1; // +1 agar hari ini juga dihitung
-
-
-    //     return response()->json([
-    //         'progressPercentage' => number_format($progressPercentage, 2),
-    //         'currentSpent' => number_format($totalSpentThisMonth, 0, ',', '.'),
-    //         'target' => number_format($nextLevelRequirement, 0, ',', '.'),
-    //         'remainingAmount' => number_format($remainingAmount, 0, ',', '.'),
-    //         'currentLevel' => $currentLevelName,
-    //         'nextLevel' => $nextLevelName,
-    //         'readyForUpgrade' => $readyForUpgrade, // Kirim status siap naik level
-    //         'daysLeftInMonth' => $daysLeftInMonth,
-    //     ]);
-    // }
 
     public function show($first_name)
     {
@@ -328,6 +135,10 @@ class ProfileController extends Controller
         // Ambil semua orders berdasarkan user yang login
         $orders = Order::where('user_id', $user->id)->latest()->get();
 
+        $payments = [];
+            foreach ($orders as $order) {
+                $payments[$order->id] = Payment::where('order_id', $order->id)->first();
+            }
         // Daftar level dan syarat minimal pembelian untuk upgrade
         $levelRequirements = [
             1 => 500000,    // Ruby
@@ -356,6 +167,7 @@ class ProfileController extends Controller
         return view('profile', compact(
             'user', 
             'orders', 
+            'payments',
             'totalOrdersThisMonth', 
             'totalOrdersLastMonth', 
             'orderPercentageChange', 

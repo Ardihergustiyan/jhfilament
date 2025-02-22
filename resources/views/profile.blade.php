@@ -488,7 +488,7 @@
           <dl class="w-1/2 sm:w-48">
             <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Order ID:</dt>
             <dd class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
-              <a href="#" class="hover:underline">#FWB12546798</a>
+              <a href="#" class="hover:underline">{{ $order->id }}</a>
             </dd>
           </dl>
 
@@ -501,11 +501,42 @@
             <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Total Harga:</dt>
             <dd class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">Rp{{ number_format($order->total_price, 0, ',', '.') }}</dd>
           </dl>
-       
+          
+          @if (isset($payments[$order->id]))
+            @switch($payments[$order->id]->payment_status)
+                @case('pending')
+                    <dl class="w-1/2 sm:w-1/4 sm:flex-1 lg:w-auto">
+                        <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Status Pembayaran:</dt>
+                        <dd class="mt-1.5 inline-flex items-center rounded bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                            <svg class="me-1 h-3 w-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Pending
+                        </dd>
+                    </dl>
+                    @break
+                @case('dibayar')
+                    <dl class="w-1/2 sm:w-1/4 sm:flex-1 lg:w-auto">
+                        <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Status Pembayaran:</dt>
+                        <dd class="me-2 mt-1.5 inline-flex shrink-0 items-center rounded bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-300">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                            Dibayar
+                        </dd>
+                    </dl>
+                    @break
+                @default
+                    <p class="text-gray-600">Status Pembayaran: Tidak Diketahui</p>
+            @endswitch
+        @else
+            <p class="text-gray-600">Status Pembayaran: Data Pembayaran Tidak Tersedia</p>
+        @endif
+
           @switch($order->status->id)
                 @case(1)
                   <dl class="w-1/2 sm:w-1/4 sm:flex-1 lg:w-auto">
-                      <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Status:</dt>
+                      <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Status Pemesanan:</dt>
                       <dd class="mt-1.5 inline-flex items-center rounded bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
                           <svg class="me-1 h-3 w-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
