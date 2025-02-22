@@ -85,7 +85,39 @@ class CheckoutController extends Controller
 
         $total = $subtotal - $voucherAmount;
 
-        return view('checkout', compact('cartItems', 'subtotal', 'voucherAmount', 'total'));
+        // Generate snap token
+        \Midtrans\Config::$serverKey = config('midtrans.server_key');
+        \Midtrans\Config::$isProduction = false;
+        \Midtrans\Config::$isSanitized = true;
+        \Midtrans\Config::$is3ds = true;
+
+        $itemDetails = [];
+        foreach ($cartItems as $item) {
+            $itemDetails[] = [
+                'id' => $item->product_id,
+                'price' => $item->discounted_price ?? $item->final_price,
+                'quantity' => $item->quantity,
+                'name' => $item->product_name,
+            ];
+        }
+
+        $params = array(
+            'transaction_details' => array(
+                'order_id' => 'ORDER-' . uniqid(), // Anda bisa menggunakan ID yang sesuai
+                'gross_amount' => $total,
+            ),
+            'customer_details' => array(
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'email' => $user->email,
+                'phone' => $user->phone_number,
+            ),
+            'item_details' => $itemDetails,
+        );
+
+        $snapToken = \Midtrans\Snap::getSnapToken($params);
+
+        return view('checkout', compact('cartItems', 'subtotal', 'voucherAmount', 'total', 'snapToken'));
     }
 
     public function store(Request $request)
@@ -352,8 +384,45 @@ class CheckoutController extends Controller
                 'order_id' => $order->id,
                 'payment_method' => $request->input('payment-method'),
                 'payment_status' => 'pending',
-                'transaction_id' => null,
             ]);
+            // Set your Merchant Server Key
+            \Midtrans\Config::$serverKey = config('midtrans.server_key');
+            // Set to Development/Sandbox Environment (default). Set to true for Production Environment (accept real transaction).
+            \Midtrans\Config::$isProduction = false;
+            // Set sanitization on (default)
+            \Midtrans\Config::$isSanitized = true;
+            // Set 3DS transaction for credit card to true
+            \Midtrans\Config::$is3ds = true;
+
+            // Siapkan item details
+            $itemDetails = [];
+            foreach ($cartItems as $item) {
+                $itemDetails[] = [
+                    'id' => $item->product_id, // ID produk
+                    'price' => $item->discounted_price ?? $item->final_price, // Harga per item
+                    'quantity' => $item->quantity, // Jumlah item
+                    'name' => $item->product_name, // Nama produk
+                ];
+            }
+
+            $params = array(
+                'transaction_details' => array(
+                    'order_id' => 'ORDER-' . $order->id,
+                    'gross_amount' => $total,
+                ),
+                'customer_details' => array(
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'email' => $user->email,
+                'phone' => $user->phone_number,
+                ),
+                'item_details' => $itemDetails,
+            );
+
+            $snapToken = \Midtrans\Snap::getSnapToken($params);
+
+            // Simpan snap token ke kolom transaction_id di tabel payments
+            Payment::where('order_id', $order->id)->update(['transaction_id' => $snapToken]);
 
             // Hapus cart items setelah checkout
             Cart::where('user_id', $user->id)->delete();
@@ -362,8 +431,12 @@ class CheckoutController extends Controller
             DB::commit();
 
             // Redirect ke halaman terima kasih
-            return redirect()->route('order.order-detail', ['order_id' => $order->id])
-                    ->with('success', 'Order berhasil dibuat!');
+            // Kembalikan snapToken dan order_id sebagai respons JSON
+            return response()->json([
+                'success' => true,
+                'snap_token' => $snapToken,
+                'order_id' => $order->id,
+            ]);
         } catch (\Exception $e) {
             // Rollback transaction jika ada error
             DB::rollBack();

@@ -7,6 +7,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ProductController;
@@ -132,3 +133,5 @@ Route::get('/payment/success', [OrderController::class, 'success'])->name('payme
 // Route::post('/profile/upload', [ProfileController::class, 'upload'])->name('profile.upload');
 
 
+Route::post('/midtrans-callback', [CheckoutController::class, 'handleMidtransCallback']);
+Route::post('/midtrans/notification', [CheckoutController::class,'handleMidtransNotification']);

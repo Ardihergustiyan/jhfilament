@@ -6,7 +6,7 @@
 </nav>
 
 <section class="bg-parent py-8 antialiased dark:bg-gray-900 md:py-16">
-  <form action="{{ route('checkout.process') }}" method="POST" class="mx-auto max-w-screen-xl px-4 2xl:px-0">
+  <form id="checkout-form" action="{{ route('checkout.process') }}" method="POST" class="mx-auto max-w-screen-xl px-4 2xl:px-0">
     @csrf
     <ol class="items-center flex w-full max-w-2xl text-center text-sm font-medium text-gray-500 dark:text-gray-400 sm:text-base">
       <li class="after:border-1 flex items-center text-primary-700 after:mx-6 after:hidden after:h-1 after:w-full after:border-b after:border-gray-200 dark:text-primary-500 dark:after:border-gray-700 sm:after:inline-block sm:after:content-[''] md:w-full xl:after:mx-10">
@@ -226,7 +226,7 @@
           
   
           <div class="space-y-3">
-            <button type="submit" class="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4  focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Bayar</button>
+            <button id="submit-button" type="submit" class="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4  focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Bayar</button>
             
             @if ($errors->any())
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
@@ -359,3 +359,63 @@
         >
   </div>
 </footer>
+<script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+<script>
+    document.getElementById('checkout-form').addEventListener('submit', function (event) {
+        event.preventDefault(); // Mencegah form submit default
+
+        // Tampilkan loading indicator (opsional)
+        document.getElementById('submit-button').disabled = true;
+        document.getElementById('submit-button').innerText = 'Processing...';
+
+        // Kirim data form ke backend menggunakan AJAX
+        fetch("{{ route('checkout.process') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                // Data form yang diperlukan
+                'payment-method': document.querySelector('[name="payment-method"]').value,
+                'delivery-method': document.querySelector('[name="delivery-method"]').value,
+                'phone_number': document.querySelector('[name="phone_number"]').value,
+                'notes': document.querySelector('[name="notes"]').value,
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.snap_token) {
+                // Tampilkan pop-up Midtrans
+                snap.pay(data.snap_token, {
+                    onSuccess: function(result) {
+                        // Redirect ke halaman order detail setelah pembayaran berhasil
+                        window.location.href = "{{ route('order.order-detail', ['order_id' => ':order_id']) }}".replace(':order_id', data.order_id);
+                    },
+                    onPending: function(result) {
+                        alert("Menunggu pembayaran Anda!");
+                        window.location.href = "{{ route('order.order-detail', ['order_id' => ':order_id']) }}".replace(':order_id', data.order_id);
+                    },
+                    onError: function(result) {
+                        alert("Pembayaran gagal!");
+                        window.location.href = "{{ route('order.order-detail', ['order_id' => ':order_id']) }}".replace(':order_id', data.order_id);
+                    },
+                    onClose: function() {
+                        alert("Anda menutup pop-up tanpa menyelesaikan pembayaran.");
+                        window.location.href = "{{ route('order.order-detail', ['order_id' => ':order_id']) }}".replace(':order_id', data.order_id);
+                    }
+                });
+            } else {
+                alert("Terjadi kesalahan saat memproses pembayaran.");
+                document.getElementById('submit-button').disabled = false;
+                document.getElementById('submit-button').innerText = 'Checkout';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Terjadi kesalahan saat memproses pembayaran.");
+            document.getElementById('submit-button').disabled = false;
+            document.getElementById('submit-button').innerText = 'Checkout';
+        });
+    });
+</script>

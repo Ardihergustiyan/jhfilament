@@ -244,6 +244,8 @@
                     </form>
                     <div id="voucher-message" class="mt-2 text-sm text-red-600"></div>
                     </div>
+
+                    
                     <script>
                         function updateVariant(selectElement, cartItemId) {
                             const variantId = selectElement.value;
