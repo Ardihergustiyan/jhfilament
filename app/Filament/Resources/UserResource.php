@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Resources\UserResource\RelationManagers;
+use App\Models\ResellerLevel;
 use App\Models\User;
 use Closure;
 use Filament\Forms;
@@ -72,30 +73,43 @@ class UserResource extends Resource
                         ->dehydrated(fn($state)=> filled($state))
                         ->required(fn (Page $livewire): bool => $livewire instanceof CreateRecord),
 
-                    Select::make('roles')
-                        ->relationship('roles', 'name')
-                        ->preload()
-                        ->live()
-                        ->required()
-                        ->afterStateUpdated(fn ($state, Set $set) => $set('reseller_level_id', null)),
+                    // Select::make('roles')
+                    //     ->relationship('roles', 'name')
+                    //     ->preload()
+                    //     ->live()
+                    //     ->required()
+                    //     ->afterStateUpdated(fn ($state, Set $set) => $set('reseller_level_id', null)),
 
-                    // Select::make('reseller_level_id')
-                    //     ->relationship('resellerLevel', 'name') // Pastikan relasi "resellerLevel" benar
-                    //     ->label('Reseller Level')
-                    //     ->visible(function (Get $get) {
-                    //         $role = $get('roles'); // Ambil nilai 'roles'
-                    //         // Debug tipe data dan isi nilai
-                    //         info('Role type: ' . gettype($role)); 
-                    //         info('Role value: ' . json_encode($role)); // Log nilai sebagai JSON
-                            
-                    //         return $role === 'Reseller'; // Periksa nilai
-                    //     })
-                    //     ->required(function (Get $get) {
-                    //         $role = $get('roles'); // Debug nilai roles
-                    //         return $role === 'Reseller';
-                    //     }),
                     
-                ]);
+                    Select::make('roles')
+                        ->label('Role')
+                        ->relationship('roles', 'name')
+                        ->reactive()
+                        ->required()
+                        ->default(function ($record) {
+                            // Set nilai default berdasarkan data yang sudah ada
+                            return $record ? $record->role_id : null;
+                        })
+                        ->afterStateUpdated(fn ($state, Set $set) => $set('reseller_level_id', null)),
+                    
+                    Select::make('reseller_level_id')
+                        ->label('Reseller Level')
+                        ->options(function (callable $get) {
+                            $role = $get('roles'); // Ambil nilai roles yang dipilih (berupa ID)
+                    
+                            // Jika roles adalah 'Reseller' (ID = 2), tampilkan daftar reseller level
+                            if ($role == 3) { // Bandingkan dengan ID role, bukan string
+                                return ResellerLevel::all()->pluck('name', 'id'); // Ambil nama dan ID reseller level
+                            }
+                    
+                            // Jika bukan 'Reseller', kembalikan array kosong
+                            return [];
+                        })
+                        ->hidden(fn (callable $get) => $get('roles') != 3) // Sembunyikan jika roles bukan 'Reseller' (ID = 2)
+                        ->required(fn (callable $get) => $get('roles') == 3) // Wajib diisi jika roles adalah 'Reseller' (ID = 2)
+                        ->multiple(false) // Pastikan ini false jika hanya satu nilai yang diizinkan
+                    ]);
+                    
     }
 
     public static function table(Table $table): Table
