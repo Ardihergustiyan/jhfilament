@@ -12,16 +12,16 @@ use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 class Dashboard extends \Filament\Pages\Dashboard
 {
     use HasFiltersForm;
+    protected static ?int $navigationSort = 2;
     public function filtersForm(Form $form): Form
     {
         return $form->schema([
             // Add your form fields here
             Section::make("Filter")->schema([
-                TextInput::make("name"),
+                // TextInput::make("name"),
                 DatePicker::make("created_at"),
                 DatePicker::make("updated_at"),
-                Toggle::make("is_active"),
-            ])->columns(4),
+            ])->columns(2),
 
         ]);
     }
