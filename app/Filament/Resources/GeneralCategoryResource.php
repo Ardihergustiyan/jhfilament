@@ -19,6 +19,7 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 
@@ -30,8 +31,30 @@ class GeneralCategoryResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $pluralLabel = 'Kategori Umum';
-    protected static ?string $navigationGroup = 'Product Management';
-    protected static ?int $navigationSort = 1;
+    
+    public static function canViewAny(): bool
+    {
+        // Hanya admin yang bisa mengakses resource ini
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canCreate(): bool
+    {
+        // Hanya superAdmin yang bisa membuat permission baru
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canEdit($record): bool
+    {
+        // Hanya superAdmin yang bisa mengedit permission
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canDelete($record): bool
+    {
+        // Hanya superAdmin yang bisa menghapus permission
+        return Auth::user()->hasRole('superAdmin');
+    }
 
     public static function form(Form $form): Form
     {

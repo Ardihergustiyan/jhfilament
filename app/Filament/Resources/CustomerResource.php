@@ -13,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class CustomerResource extends Resource
 {
@@ -23,9 +24,30 @@ class CustomerResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
-    
-    protected static ?int $navigationSort = 1;
-    protected static ?string $navigationGroup = 'User Management';
+    public static function canViewAny(): bool
+    {
+        // Hanya admin yang bisa mengakses resource ini
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canCreate(): bool
+    {
+        // Hanya superAdmin yang bisa membuat permission baru
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canEdit($record): bool
+    {
+        // Hanya superAdmin yang bisa mengedit permission
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canDelete($record): bool
+    {
+        // Hanya superAdmin yang bisa menghapus permission
+        return Auth::user()->hasRole('superAdmin');
+    }
+
 
     public static function shouldRegisterNavigation(): bool
     {

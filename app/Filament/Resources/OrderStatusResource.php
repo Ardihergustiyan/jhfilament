@@ -18,6 +18,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class OrderStatusResource extends Resource
@@ -28,8 +29,29 @@ class OrderStatusResource extends Resource
 
     protected static ?string $pluralLabel = 'Status Order';
 
-    protected static ?int $navigationSort = 6;
-    protected static ?string $navigationGroup = 'Order Management';
+    public static function canViewAny(): bool
+    {
+        // Hanya admin yang bisa mengakses resource ini
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canCreate(): bool
+    {
+        // Hanya superAdmin yang bisa membuat permission baru
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canEdit($record): bool
+    {
+        // Hanya superAdmin yang bisa mengedit permission
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canDelete($record): bool
+    {
+        // Hanya superAdmin yang bisa menghapus permission
+        return Auth::user()->hasRole('superAdmin');
+    }
 
     public static function form(Form $form): Form
     {

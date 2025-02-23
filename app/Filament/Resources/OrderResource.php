@@ -27,9 +27,11 @@ use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Number;
 
 class OrderResource extends Resource
@@ -42,6 +44,14 @@ class OrderResource extends Resource
 
     protected static ?int $navigationSort = 6;
     protected static ?string $navigationGroup = 'Order Management';
+
+   
+
+    public static function canEdit($record): bool
+    {
+        // Hanya superAdmin yang bisa mengedit permission
+        return Auth::user()->hasRole('superAdmin');
+    }
 
     public static function form(Form $form): Form
     {
@@ -99,35 +109,37 @@ class OrderResource extends Resource
                         ->columnSpan(6),
                     
                     
-                Forms\Components\Fieldset::make('Payment Details')
-                    ->label('Detail Pembayaran')
-                    ->relationship('payment')
-                    ->schema([
-                        Select::make('payment_method')
-                            ->label('Metode Pembayaran')
-                            ->options([
-                                'e-wallet' => 'E Wallet',
-                                'cod' => 'Cash On Delivery',
-                                'transfer' => 'Bank Transfer'
-                            ])
-                            ->columnSpan(4)
-                            ->required(),
-                        Select::make('payment_status')
-                            ->label('Status Pembayaran')
-                            ->options([
-                                'pending' => 'Pending',
-                                'dibayar' => 'Dibayar',
-                                'gagal' => 'Gagal'
-                            ])
-                            ->columnSpan(4)
-                            ->default('pending')
-                            ->required(),
-                        TextInput::make('transaction_id')
-                            ->label('ID Transaksi')
-                            ->columnSpan(4)
-                            ->nullable(),
-                        ])->columns(12),
-                ])->columns(12),
+                        Forms\Components\Fieldset::make('Payment Details')
+                        ->label('Detail Pembayaran')
+                        ->relationship('payment') // Pastikan relasi ini ada
+                        ->schema([
+                            Select::make('payment_method')
+                                ->label('Metode Pembayaran')
+                                ->options([
+                                    'e-wallet' => 'E Wallet',
+                                    'cod' => 'Cash On Delivery',
+                                    'transfer' => 'Bank Transfer',
+                                ])
+                                ->columnSpan(4)
+                                ->required(),
+                            Select::make('payment_status')
+                                ->label('Status Pembayaran')
+                                ->options([
+                                    'pending' => 'Pending',
+                                    'dibayar' => 'Dibayar',
+                                    'gagal' => 'Gagal',
+                                ])
+                                ->columnSpan(4)
+                                ->default('pending')
+                                ->required(),
+                            TextInput::make('transaction_id')
+                                ->label('ID Transaksi')
+                                ->columnSpan(4)
+                                ->nullable(),
+                        ])
+                        ->columns(12)
+                        ->visible(fn ($record) => $record && $record->payment), // Hanya tampilkan jika relasi payment ada
+                ]),
                 
                 Section::make('Daftar Pesanan')->schema([
                     Repeater::make('Items')
@@ -253,10 +265,14 @@ class OrderResource extends Resource
                     ->searchable()
                     ->sortable(),
                     
-                TextColumn::make('payment.payment_status')
-                    ->label('status pembayaran')
-                    ->searchable()
-                    ->sortable(),
+                Tables\Columns\SelectColumn::make('payment.payment_status') // Akses melalui relasi payment
+                    ->label('Ubah Status Pembayaran')
+                    ->options([
+                        'dibayar' => 'Dibayar',
+                        'pending' => 'Pending',
+                    ])
+                    ->rules(['required', 'in:dibayar,pending']) // Validasi input
+                    ->placeholder('Pilih Status'),
                 Tables\Columns\SelectColumn::make('status_id')
                 ->label('status pesanan')
                 ->options([
@@ -265,6 +281,10 @@ class OrderResource extends Resource
                     '3' => 'Selesai',
                     '4' => 'Dibatalkan'
                 ])
+                ->disableOptionWhen(function ($value, $record) {
+                    // Nonaktifkan opsi "Selesai" jika status pembayaran bukan "dibayar"
+                    return $value == '3' && $record->payment->payment_status != 'dibayar';
+                })
                 ->searchable()
                 ->sortable(),
                     
@@ -279,14 +299,48 @@ class OrderResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                // Filter berdasarkan bulan
+                Filter::make('created_at')
+                    ->form([
+                        Forms\Components\Select::make('month')
+                            ->label('Bulan')
+                            ->options([
+                                '01' => 'Januari',
+                                '02' => 'Februari',
+                                '03' => 'Maret',
+                                '04' => 'April',
+                                '05' => 'Mei',
+                                '06' => 'Juni',
+                                '07' => 'Juli',
+                                '08' => 'Agustus',
+                                '09' => 'September',
+                                '10' => 'Oktober',
+                                '11' => 'November',
+                                '12' => 'Desember',
+                            ])
+                            ->placeholder('Pilih Bulan'),
+                        Forms\Components\Select::make('year')
+                            ->label('Tahun')
+                            ->options(function () {
+                                $years = range(now()->year, 2020); // Sesuaikan range tahun sesuai kebutuhan
+                                return array_combine($years, $years);
+                            })
+                            ->placeholder('Pilih Tahun'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['month'],
+                                fn (Builder $query, $month): Builder => $query->whereMonth('created_at', $month),
+                            )
+                            ->when(
+                                $data['year'],
+                                fn (Builder $query, $year): Builder => $query->whereYear('created_at', $year),
+                            );
+                    }),
             ])
             ->actions([
-                 ActionGroup::make([
-                    ViewAction::make(),
-                    EditAction::make(),
-                    DeleteAction::make(),
-                ])
+                DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

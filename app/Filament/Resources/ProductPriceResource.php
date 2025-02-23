@@ -20,6 +20,8 @@ class ProductPriceResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
 
+    protected static ?string $pluralLabel = 'Daftar harga';
+
     protected static ?int $navigationSort = 4;
     protected static ?string $navigationGroup = 'Product Management';
 

@@ -10,6 +10,7 @@ use App\Models\User;
 use Closure;
 use Filament\Forms;
 use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -25,6 +26,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Filters\SelectFilter;
 
 class UserResource extends Resource
 {
@@ -38,78 +41,86 @@ class UserResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-                ->schema([
-                    Forms\Components\TextInput::make('first_name')
-                        ->required()
-                        ->maxLength(255),
-                    Forms\Components\TextInput::make('last_name')
-                        ->required()
-                        ->maxLength(255),
-                    Forms\Components\TextInput::make('email')
-                        ->label('Email Address')
-                        ->email()
-                        ->maxLength(255)
-                        ->unique(ignoreRecord: true)
-                        ->required(),
-                    Forms\Components\DateTimePicker::make('email_verified_at')
-                        ->label('Email Verified At')
-                        ->default(now()),
-                    Forms\Components\TextInput::make('phone_number')
-                        ->tel()
-                        ->required()
-                        ->maxLength(15),
-                    Forms\Components\FileUpload::make('image')
-                        ->image()
-                        ->directory('user-images'),
-                    Forms\Components\Textarea::make('address')
-                        ->maxLength(65535),
-                    Forms\Components\Toggle::make('is_active')
-                        ->label('Status Aktif')
-                        ->default(true),
-                    Forms\Components\TextInput::make('password')
-                        ->password()
-                        ->revealable()
-                        ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                        ->dehydrated(fn($state)=> filled($state))
-                        ->required(fn (Page $livewire): bool => $livewire instanceof CreateRecord),
+            ->schema([
+                // Section 1: Informasi Dasar Pengguna
+                Section::make('Informasi Dasar Pengguna')
+                    ->schema([
+                        Forms\Components\TextInput::make('first_name')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('last_name')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('email')
+                            ->label('Email Address')
+                            ->email()
+                            ->maxLength(255)
+                            ->unique(ignoreRecord: true)
+                            ->required(),
+                        Forms\Components\DateTimePicker::make('email_verified_at')
+                            ->label('Email Verified At')
+                            ->default(now()),
+                        Forms\Components\TextInput::make('phone_number')
+                            ->tel()
+                            ->required()
+                            ->maxLength(15),
+                        Forms\Components\Textarea::make('address')
+                            ->maxLength(65535),
+                    ])
+                    ->columns(2), // Menampilkan field dalam 2 kolom
 
-                    // Select::make('roles')
-                    //     ->relationship('roles', 'name')
-                    //     ->preload()
-                    //     ->live()
-                    //     ->required()
-                    //     ->afterStateUpdated(fn ($state, Set $set) => $set('reseller_level_id', null)),
+                // Section 2: Pengaturan Akun
+                Section::make('Pengaturan Akun')
+                    ->schema([
+                        Forms\Components\Toggle::make('is_active')
+                            ->label('Status Aktif')
+                            ->default(true),
+                        Forms\Components\TextInput::make('password')
+                            ->password()
+                            ->revealable()
+                            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->required(fn (Page $livewire): bool => $livewire instanceof CreateRecord),
+                    ])
+                    ->columns(2), // Menampilkan field dalam 2 kolom
 
-                    
-                    Select::make('roles')
-                        ->label('Role')
-                        ->relationship('roles', 'name')
-                        ->reactive()
-                        ->required()
-                        ->default(function ($record) {
-                            // Set nilai default berdasarkan data yang sudah ada
-                            return $record ? $record->role_id : null;
-                        })
-                        ->afterStateUpdated(fn ($state, Set $set) => $set('reseller_level_id', null)),
-                    
-                    Select::make('reseller_level_id')
-                        ->label('Reseller Level')
-                        ->options(function (callable $get) {
-                            $role = $get('roles'); // Ambil nilai roles yang dipilih (berupa ID)
-                    
-                            // Jika roles adalah 'Reseller' (ID = 2), tampilkan daftar reseller level
-                            if ($role == 3) { // Bandingkan dengan ID role, bukan string
-                                return ResellerLevel::all()->pluck('name', 'id'); // Ambil nama dan ID reseller level
-                            }
-                    
-                            // Jika bukan 'Reseller', kembalikan array kosong
-                            return [];
-                        })
-                        ->hidden(fn (callable $get) => $get('roles') != 3) // Sembunyikan jika roles bukan 'Reseller' (ID = 2)
-                        ->required(fn (callable $get) => $get('roles') == 3) // Wajib diisi jika roles adalah 'Reseller' (ID = 2)
-                        ->multiple(false) // Pastikan ini false jika hanya satu nilai yang diizinkan
-                    ]);
-                    
+                // Section 3: Role dan Reseller Level
+                Section::make('Role dan Reseller Level')
+                    ->schema([
+                        Select::make('roles')
+                            ->label('Role')
+                            ->relationship('roles', 'name')
+                            ->reactive()
+                            ->required()
+                            ->default(function ($record) {
+                                // Set nilai default berdasarkan data yang sudah ada
+                                return $record ? $record->roles->first()?->id : null;
+                            })
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                // Jika role yang dipilih bukan reseller (ID 3), set reseller_level_id menjadi null
+                                if ($state != 3) {
+                                    $set('reseller_level_id', null);
+                                }
+                            }),
+                        Select::make('reseller_level_id')
+                            ->label('Reseller Level')
+                            ->options(function (callable $get) {
+                                $role = $get('roles'); // Ambil nilai roles yang dipilih (berupa ID)
+
+                                // Jika roles adalah 'Reseller' (ID = 3), tampilkan daftar reseller level
+                                if ($role == 3) {
+                                    return ResellerLevel::all()->pluck('name', 'id'); // Ambil nama dan ID reseller level
+                                }
+
+                                // Jika bukan 'Reseller', kembalikan array kosong
+                                return [];
+                            })
+                            ->hidden(fn (callable $get) => $get('roles') != 3) // Sembunyikan jika roles bukan 'Reseller' (ID = 3)
+                            ->required(fn (callable $get) => $get('roles') == 3) // Wajib diisi jika roles adalah 'Reseller' (ID = 3)
+                            ->multiple(false), // Pastikan ini false jika hanya satu nilai yang diizinkan
+                    ])
+                    ->columns(2), // Menampilkan field dalam 2 kolom
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -124,7 +135,6 @@ class UserResource extends Resource
                 ->getStateUsing(function ($record) {
                     return $record->first_name . ' ' . $record->last_name;
                 }),
-            
             Tables\Columns\TextColumn::make('email')
                 ->label('Email')
                 ->sortable()
@@ -132,16 +142,15 @@ class UserResource extends Resource
             Tables\Columns\TextColumn::make('roles.name')
                 ->label('Role')
                 ->searchable(),
-            // Tables\Columns\TextColumn::make('email_verified_at')
-            //     ->label('Email Verified At')
-            //     ->sortable()
-            //     ->dateTime()
-            //     ->description(fn ($record) => $record->email_verified_at ? 'Verified' : 'Not Verified'),
+
             Tables\Columns\TextColumn::make('phone_number')
                 ->label('Phone Number'),
             Tables\Columns\BooleanColumn::make('is_active')
                 ->label('Active'),
-            
+            Tables\Columns\TextColumn::make('resellerLevel.name') // Akses melalui relasi reseller
+                ->label('Reseller Level')
+                ->searchable()
+                ->sortable(),
             Tables\Columns\TextColumn::make('created_at')
                 ->label('Created At')
                 ->dateTime(),
@@ -155,6 +164,17 @@ class UserResource extends Resource
                 ->label('Email Verified')
                 ->query(fn (Builder $query) => $query->whereNotNull('email_verified_at'))
                 ->toggle(),
+                
+            // Tambahkan filter berdasarkan role menggunakan Spatie
+            SelectFilter::make('roles') // Filter berdasarkan roles
+                ->label('Role')
+                ->options([
+                    'Admin' => 'Admin',
+                    'Reseller' => 'Reseller',
+                    'Customer' => 'Customer',
+                ])
+                ->relationship('roles', 'name') // Gunakan relasi roles dan kolom name
+                ->placeholder('Pilih Role'), // Opsional: Tambahkan placeholder
         ])
         ->actions([
             ActionGroup::make([

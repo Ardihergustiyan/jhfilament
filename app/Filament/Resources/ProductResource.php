@@ -182,6 +182,8 @@ class ProductResource extends Resource
                             ? $record->image[0] 
                             : null; 
                     })
+                    ->width(50) // Atur lebar gambar
+                    ->height(50) // Atur tinggi gambar
                     ->searchable(),    
 
                 Tables\Columns\TextColumn::make('category.name')

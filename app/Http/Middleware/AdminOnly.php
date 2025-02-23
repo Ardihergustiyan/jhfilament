@@ -16,8 +16,8 @@ class AdminOnly
      */
     public function handle(Request $request, Closure $next)
     {
-        // Izinkan akses ke halaman login tanpa pengecekan role
-        if ($request->is('admin/login')) {
+         // Izinkan akses ke halaman login dan reset password tanpa pengecekan role
+         if ($request->is('admin/login') || $request->is('admin/password-reset/*')) {
             return $next($request);
         }
 

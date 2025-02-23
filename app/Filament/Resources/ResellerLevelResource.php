@@ -14,6 +14,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class ResellerLevelResource extends Resource
@@ -28,9 +29,29 @@ class ResellerLevelResource extends Resource
 
     protected static ?string $slug = 'reseller-levels';
 
-    
-    protected static ?int $navigationSort = 9;
-    protected static ?string $navigationGroup = 'User Management';
+    public static function canViewAny(): bool
+    {
+        // Hanya admin yang bisa mengakses resource ini
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canCreate(): bool
+    {
+        // Hanya superAdmin yang bisa membuat permission baru
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canEdit($record): bool
+    {
+        // Hanya superAdmin yang bisa mengedit permission
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canDelete($record): bool
+    {
+        // Hanya superAdmin yang bisa menghapus permission
+        return Auth::user()->hasRole('superAdmin');
+    }
 
     public static function form(Form $form): Form
     {

@@ -15,13 +15,37 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-
+use Illuminate\Support\Facades\Auth;
 
 class PermissionResource extends Resource
 {
     protected static ?string $model = Permission::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-key';
+
+    public static function canViewAny(): bool
+    {
+        // Hanya admin yang bisa mengakses resource ini
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canCreate(): bool
+    {
+        // Hanya superAdmin yang bisa membuat permission baru
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canEdit($record): bool
+    {
+        // Hanya superAdmin yang bisa mengedit permission
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canDelete($record): bool
+    {
+        // Hanya superAdmin yang bisa menghapus permission
+        return Auth::user()->hasRole('superAdmin');
+    }
 
     protected static ?int $navigationSort = 3;
     protected static ?string $navigationGroup = 'Settings';

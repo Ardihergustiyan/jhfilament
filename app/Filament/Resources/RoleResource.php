@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
-
+use Illuminate\Support\Facades\Auth;
 
 class RoleResource extends Resource
 {
@@ -28,6 +28,30 @@ class RoleResource extends Resource
 
     protected static ?int $navigationSort = 2;
     protected static ?string $navigationGroup = 'Settings';
+
+    public static function canViewAny(): bool
+    {
+        // Hanya admin yang bisa mengakses resource ini
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canCreate(): bool
+    {
+        // Hanya superAdmin yang bisa membuat permission baru
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canEdit($record): bool
+    {
+        // Hanya superAdmin yang bisa mengedit permission
+        return Auth::user()->hasRole('superAdmin');
+    }
+
+    public static function canDelete($record): bool
+    {
+        // Hanya superAdmin yang bisa menghapus permission
+        return Auth::user()->hasRole('superAdmin');
+    }
 
     public static function form(Form $form): Form
     {
