@@ -46,6 +46,15 @@ class User extends Authenticatable implements  HasName
         'remember_token',
     ];
 
+    protected static function booted()
+    {
+        static::saving(function ($user) {
+            // Jika role yang dipilih bukan reseller (ID 3), set reseller_level_id menjadi null
+            if ($user->roles->first()?->id != 3) {
+                $user->reseller_level_id = null;
+            }
+        });
+    }
     /**
      * The attributes that should be cast.
      *
