@@ -44,6 +44,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                     // Widgets\AccountWidget::class,
                 PenjualanChart::class,
+                PenjualanChart::class,
 
                 // Widgets\FilamentInfoWidget::class,
             ])
