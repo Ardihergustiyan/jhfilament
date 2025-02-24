@@ -34,6 +34,9 @@ class User extends Authenticatable implements  HasName
         'address',       // Baru
         'status',        // Baru
         'reseller_level_id',
+        'google_id',
+        'google_token',
+        'google_refresh_token',
     ];
 
     /**

@@ -84,20 +84,19 @@
         
 
         <!-- Google Login Button -->
-        <button
-          type="button"
-          class="w-full border text-gray-700 rounded-md py-2 mt-6 flex items-center justify-center hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-500 active:bg-gray-200 active:border-gray-400 transition duration-300"
-        >
-          <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google" class="inline w-4 h-4 mr-3" />
-          Login with Google
-        </button>
+        <a
+            href="/auth/redirect"
+            class="w-full border text-gray-700 rounded-md py-2 mt-6 flex items-center justify-center hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-500 active:bg-gray-200 active:border-gray-400 transition duration-300"
+            >
+            <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google" class="inline w-4 h-4 mr-3" />
+            Login with Google
+        </a>
 
         <!-- Forgot Password & Sign Up Links -->
         <div class="text-center mt-6 space-y-3">
-          <a href="#" class="text-pink-500 font-semibold block">Forgot your password?</a>
           <p class="text-gray-500">
-            Don't have an account?
-            <a href="/register" class="text-pink-500 font-semibold">Create one</a>
+            Belum punya akun?
+            <a href="/register" class="text-pink-500 font-semibold">Register</a>
           </p>
         </div>
       </div>
@@ -111,24 +110,24 @@
 
     <script>
         function validateForm() {
-    let isValid = true;
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
-    const emailWarning = document.getElementById('emailWarning');
-    const passwordWarning = document.getElementById('passwordWarning');
+            let isValid = true;
+            const email = document.getElementById('email');
+            const password = document.getElementById('password');
+            const emailWarning = document.getElementById('emailWarning');
+            const passwordWarning = document.getElementById('passwordWarning');
 
-    if (!email.value) {
-        emailWarning.classList.remove('hidden');
-        isValid = false;
-    }
+            if (!email.value) {
+                emailWarning.classList.remove('hidden');
+                isValid = false;
+            }
 
-    if (!password.value) {
-        passwordWarning.classList.remove('hidden');
-        isValid = false;
-    }
+            if (!password.value) {
+                passwordWarning.classList.remove('hidden');
+                isValid = false;
+            }
 
-    return isValid;
-}
+            return isValid;
+        }
     </script>
     </body>
 </html>

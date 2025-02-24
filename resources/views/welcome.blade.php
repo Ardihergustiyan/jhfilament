@@ -1,4 +1,5 @@
 @include('layouts.header')
+    
     <!-- marquee -->
     <div class="bg-gradient-to-r from-pink-100 via-white to-pink-100  border-gray-200 overflow-hidden">
         <div class="whitespace-nowrap animate-marquee flex">
@@ -444,7 +445,57 @@
     </div>
     {{-- end banner  --}}
 
-  
+   <!-- Modal untuk verifikasi email -->
+   @if (auth()->user() && !auth()->user()->hasVerifiedEmail())
+   <div id="verificationModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-1/3 text-center">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Verifikasi Email Anda</h2>
+        <p class="mb-6 text-gray-600">
+            Sebelum melanjutkan, harap verifikasi email Anda dengan mengklik tautan yang kami kirim ke email Anda.
+        </p>
+
+        @if (session('status') === 'verification-link-sent')
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+                Email verifikasi baru telah dikirim!
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('verification.send') }}">
+            @csrf
+            <button type="submit" class="mx-auto text-white bg-pink-500 hover:bg-pink-600 focus:ring-4 focus:outline-none focus:ring-pink-300 font-medium rounded-full text-sm px-6 py-3 transition duration-300 ease-in-out transform hover:scale-105">
+                Kirim Ulang Email Verifikasi
+            </button>
+        </form>
+    </div>
+</div>
+@endif
+
+<!-- Script untuk mencegah modal ditutup -->
+<script>
+   document.addEventListener('DOMContentLoaded', function () {
+       const modal = document.getElementById('verificationModal');
+
+       // Mencegah modal ditutup
+       modal.addEventListener('click', function (e) {
+           if (e.target === modal) {
+               e.preventDefault();
+               e.stopPropagation();
+           }
+       });
+
+       // Tutup modal hanya jika email sudah diverifikasi
+       const checkVerification = setInterval(function () {
+           fetch('/api/check-email-verification') // Buat endpoint untuk memeriksa status verifikasi
+               .then(response => response.json())
+               .then(data => {
+                   if (data.verified) {
+                       clearInterval(checkVerification);
+                       modal.remove(); // Hapus modal jika email sudah diverifikasi
+                   }
+               });
+       }, 5000); // Periksa setiap 5 detik
+   });
+</script>
     
     
 @include('components.features')

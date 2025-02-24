@@ -253,12 +253,20 @@
                         })
                         .then((data) => {
                             console.log("Response from server:", data); // Debugging
-                            alert(data.message); // Tampilkan notifikasi sukses
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Sukses!',
+                                text: data.message,
+                            });
                             updateCartItemCount(); // Perbarui jumlah item di ikon cart
                         })
                         .catch((error) => {
                             console.error("Error:", error);
-                            alert(error.message); // Tampilkan notifikasi error
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: error.message,
+                            });
                         });
                     };
                 });
