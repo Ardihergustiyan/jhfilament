@@ -23,6 +23,7 @@ class Order extends Model
         'notes',
         'discount_id',
         'voucher_id',
+        'invoice_number'
     ];
 
     /**

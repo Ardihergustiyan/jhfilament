@@ -486,9 +486,9 @@
         @foreach ($orders as $order)
         <div class="flex flex-wrap items-center gap-y-4 border-b border-gray-200 pb-4 dark:border-gray-700 md:pb-5">
           <dl class="w-1/2 sm:w-48">
-            <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Order ID:</dt>
+            <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Invoice:</dt>
             <dd class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
-              <a href="#" class="hover:underline">{{ $order->id }}</a>
+              <a href="#" class="hover:underline">{{ $order->invoice_number }}</a>
             </dd>
           </dl>
 

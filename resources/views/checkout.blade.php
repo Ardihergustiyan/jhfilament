@@ -364,6 +364,18 @@
     document.getElementById('checkout-form').addEventListener('submit', function (event) {
         event.preventDefault(); // Mencegah form submit default
 
+        // Ambil metode pembayaran yang dipilih
+        const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+
+        // Jika metode pembayaran adalah cash, langsung submit form
+        if (paymentMethod === 'cash') {
+            this.submit(); // Langsung submit form
+            return;
+        }
+
+        // Tampilkan loading indicator (opsional)
+        // Jika metode pembayaran adalah bank-transfer atau e-wallet, tampilkan pop-up Midtrans
+        if (paymentMethod === 'bank-transfer' || paymentMethod === 'e-wallet') {
         // Tampilkan loading indicator (opsional)
         document.getElementById('submit-button').disabled = true;
         document.getElementById('submit-button').innerText = 'Processing...';
@@ -377,7 +389,7 @@
             },
             body: JSON.stringify({
                 // Data form yang diperlukan
-                'payment-method': document.querySelector('[name="payment-method"]').value,
+                'payment-method': paymentMethod,
                 'delivery-method': document.querySelector('[name="delivery-method"]').value,
                 'phone_number': document.querySelector('[name="phone_number"]').value,
                 'notes': document.querySelector('[name="notes"]').value,
@@ -417,5 +429,6 @@
             document.getElementById('submit-button').disabled = false;
             document.getElementById('submit-button').innerText = 'Checkout';
         });
+    }
     });
 </script>

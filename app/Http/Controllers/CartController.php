@@ -287,15 +287,20 @@ class CartController extends Controller
             $cartItem->variant_id = $request->variant_id;
         }
 
+        // Simpan perubahan
         $cartItem->save();
 
+        // Ambil semua item cart dengan eager loading
+        $cartItems = Cart::with(['product', 'variant'])
+            ->where('user_id', auth()->id())
+            ->get();
+
         // Hitung ulang subtotal
-        $cartItems = Cart::where('user_id', auth()->id())->get();
         $subtotal = $cartItems->sum(function ($item) {
-            return ($item->final_price ?? 0) * ($item->quantity ?? 0);
+            return ($item->final_price ?? $item->product->price ?? 0) * ($item->quantity ?? 0);
         });
 
-        // Ambil voucher_id dari keranjang
+        // Ambil voucher_id dari keranjang (gunakan voucher_id dari item pertama)
         $voucherId = $cartItems->first()->voucher_id ?? null;
         $voucherAmount = 0;
 
@@ -306,13 +311,17 @@ class CartController extends Controller
             }
         }
 
+        // Hitung total
         $total = $subtotal - $voucherAmount;
 
+        // Kembalikan respons
         return response()->json([
             'success' => true,
             'subtotal' => $subtotal,
             'voucherAmount' => $voucherAmount,
             'total' => $total,
+            'item_count' => $cartItems->sum('quantity'), // Jumlah total item di cart
+            'cart_item' => $cartItem, // Data item yang di-update
         ]);
     }
   

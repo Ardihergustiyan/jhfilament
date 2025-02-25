@@ -114,6 +114,10 @@ class CheckoutController extends Controller
             ),
             'item_details' => $itemDetails,
         );
+        // Validasi gross_amount
+        if ($total <= 0) {
+            return redirect()->route('cart')->with('error', 'Total pembayaran tidak valid. Silakan tambahkan item ke keranjang.');
+        }
 
         $snapToken = \Midtrans\Snap::getSnapToken($params);
 
@@ -228,7 +232,7 @@ class CheckoutController extends Controller
     {
         // Mulai transaction
         DB::beginTransaction();
-
+    
         try {
             // Validasi input
             $request->validate([
@@ -237,16 +241,11 @@ class CheckoutController extends Controller
                 'phone_number' => 'required|string|max:15',
                 'notes' => 'nullable|string',
             ]);
-
+    
             // Ambil user yang sedang login
             $user = auth()->user();
             $resellerLevelId = $user->reseller_level_id ?? null;
-
-            // Update nomor HP jika diubah
-            if ($request->phone_number !== $user->phone_number) {
-                $user->update(['phone_number' => $request->phone_number]);
-            }
-
+    
             // Ambil item keranjang beserta harga reseller jika ada
             $cartItems = Cart::select(
                     'carts.*', 
@@ -272,11 +271,12 @@ class CheckoutController extends Controller
                 )
                 ->where('carts.user_id', $user->id)
                 ->get();
-
+    
             // Jika keranjang kosong, kembalikan ke halaman cart dengan pesan error
             if ($cartItems->isEmpty()) {
                 return redirect()->route('cart')->with('error', 'Keranjang Anda kosong.');
             }
+    
             // Periksa stok sebelum melanjutkan
             foreach ($cartItems as $item) {
                 if ($item->variant_id) {
@@ -297,22 +297,22 @@ class CheckoutController extends Controller
                     }
                 }
             }
-
+    
             // Hitung diskon untuk setiap item di keranjang
             foreach ($cartItems as $cartItem) {
                 $discounts = $this->getApplicableDiscounts($cartItem->product_id, $cartItem->product->category_id);
                 $cartItem->discounted_price = $this->calculateDiscountedPrice($cartItem->final_price, $discounts);
             }
-
+    
             // Hitung ulang subtotal, voucherAmount, dan total
             $subtotal = $cartItems->sum(function ($item) {
                 return ($item->discounted_price ?? $item->final_price ?? 0) * ($item->quantity ?? 0);
             });
-
+    
             // Ambil voucher_id dari keranjang
             $voucherId = $cartItems->first()->voucher_id ?? null;
             $voucherAmount = 0;
-
+    
             if ($voucherId) {
                 // Cari voucher berdasarkan voucher_id
                 $voucher = Voucher::where('id', $voucherId)
@@ -320,17 +320,17 @@ class CheckoutController extends Controller
                     ->where('start_date', '<=', now())
                     ->where('end_date', '>=', now())
                     ->first();
-
+    
                 if ($voucher) {
                     // Periksa apakah user sudah pernah menggunakan voucher ini sebelumnya
                     $hasUsedVoucher = Order::where('user_id', $user->id)
                                         ->where('voucher_id', $voucher->id)
                                         ->exists();
-
+    
                     if ($hasUsedVoucher) {
                         return redirect()->route('cart')->with('error', 'Anda sudah menggunakan voucher ini sebelumnya.');
                     }
-
+    
                     // Hitung voucherAmount berdasarkan persentase diskon
                     $voucherAmount = ($subtotal * $voucher->discount_percentage) / 100;
                 } else {
@@ -339,10 +339,18 @@ class CheckoutController extends Controller
                     return redirect()->route('cart')->with('error', 'Voucher tidak valid atau sudah digunakan.');
                 }
             }
-
+    
             // Hitung total
             $total = $subtotal - $voucherAmount;
-
+    
+            // Validasi gross_amount
+            if ($total <= 0) {
+                return redirect()->route('cart')->with('error', 'Total pembayaran tidak valid. Silakan tambahkan item ke keranjang.');
+            }
+    
+            // Generate invoice number
+            $invoiceNumber = $this->generateInvoiceNumber();
+    
             // Buat order baru
             $order = Order::create([
                 'user_id' => $user->id,
@@ -352,8 +360,9 @@ class CheckoutController extends Controller
                 'shipping_method' => $request->input('delivery-method'),
                 'notes' => $request->input('notes'),
                 'voucher_id' => $voucherId,
+                'invoice_number' => $invoiceNumber, 
             ]);
-
+    
             // Simpan order items dan kurangi stok
             foreach ($cartItems as $item) {
                 OrderItem::create([
@@ -364,7 +373,7 @@ class CheckoutController extends Controller
                     'unit_price' => $item->discounted_price ?? $item->final_price, // Gunakan harga yang sudah dihitung ulang
                     'total_price' => ($item->discounted_price ?? $item->final_price) * $item->quantity,
                 ]);
-
+    
                 // Kurangi stok
                 if ($item->variant_id) {
                     $variant = ProductVariant::find($item->variant_id);
@@ -378,22 +387,32 @@ class CheckoutController extends Controller
                     }
                 }
             }
-
+    
             // Buat payment record
             Payment::create([
                 'order_id' => $order->id,
                 'payment_method' => $request->input('payment-method'),
                 'payment_status' => 'pending',
             ]);
+    
+            // Jika metode pembayaran adalah cash, langsung redirect ke halaman detail pesanan
+            if ($request->input('payment-method') === 'cash') {
+                // Commit transaction
+                DB::commit();
+    
+                // Hapus cart items setelah checkout
+                Cart::where('user_id', $user->id)->delete();
+    
+                // Redirect ke halaman detail pesanan
+                return redirect()->route('order.order-detail', ['order_id' => $order->id]);
+            }
+    
             // Set your Merchant Server Key
             \Midtrans\Config::$serverKey = config('midtrans.server_key');
-            // Set to Development/Sandbox Environment (default). Set to true for Production Environment (accept real transaction).
             \Midtrans\Config::$isProduction = false;
-            // Set sanitization on (default)
             \Midtrans\Config::$isSanitized = true;
-            // Set 3DS transaction for credit card to true
             \Midtrans\Config::$is3ds = true;
-
+    
             // Siapkan item details
             $itemDetails = [];
             foreach ($cartItems as $item) {
@@ -404,38 +423,40 @@ class CheckoutController extends Controller
                     'name' => $item->product_name, // Nama produk
                 ];
             }
-
+    
             $params = array(
                 'transaction_details' => array(
                     'order_id' => 'ORDER-' . $order->id,
                     'gross_amount' => $total,
                 ),
                 'customer_details' => array(
-                'first_name' => $user->first_name,
-                'last_name' => $user->last_name,
-                'email' => $user->email,
-                'phone' => $user->phone_number,
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
+                    'email' => $user->email,
+                    'phone' => $user->phone_number,
                 ),
                 'item_details' => $itemDetails,
+                'custom_field1' => $order->invoice_number,
             );
 
             $snapToken = \Midtrans\Snap::getSnapToken($params);
-
+    
             // Simpan snap token ke kolom transaction_id di tabel payments
             Payment::where('order_id', $order->id)->update(['transaction_id' => $snapToken]);
-
+    
             // Hapus cart items setelah checkout
             Cart::where('user_id', $user->id)->delete();
-
+    
             // Commit transaction
             DB::commit();
-
+    
             // Redirect ke halaman terima kasih
             // Kembalikan snapToken dan order_id sebagai respons JSON
             return response()->json([
                 'success' => true,
                 'snap_token' => $snapToken,
                 'order_id' => $order->id,
+                'invoice_number' => $order->invoice_number,
             ]);
         } catch (\Exception $e) {
             // Rollback transaction jika ada error
@@ -443,7 +464,6 @@ class CheckoutController extends Controller
             return redirect()->route('cart')->with('error', $e->getMessage());
         }
     }
-
     private function getApplicableDiscounts($productId, $categoryId)
     {
         $now = now();
@@ -475,5 +495,21 @@ class CheckoutController extends Controller
 
         // Pastikan harga diskon tidak kurang dari 0
         return max($discountedPrice, 0);
+    }
+
+    private function generateInvoiceNumber()
+    {
+        // Contoh format: INV-YYYYMMDD-XXXX
+        $date = now()->format('Ymd');
+        $lastOrder = Order::where('invoice_number', 'like', 'INV-' . $date . '-%')->orderBy('invoice_number', 'desc')->first();
+
+        if ($lastOrder) {
+            $lastNumber = (int) substr($lastOrder->invoice_number, -4);
+            $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $nextNumber = '0001';
+        }
+
+        return 'INV-' . $date . '-' . $nextNumber;
     }
 }

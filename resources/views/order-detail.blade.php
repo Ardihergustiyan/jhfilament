@@ -12,7 +12,7 @@
         <div class="flex justify-between items-center mb-8">
             <div>
                 <h1 class="text-2xl font-bold">Invoice</h1>
-                <p class="text-gray-600">Order #{{ $order->id }}</p>
+                <p class="text-gray-600">Order #{{ $order->invoice_number }}</p>
             </div>
             <div class="text-right">
                 <p class="text-gray-600">Invoice Date: {{ $order->created_at->format('d/m/Y') }}</p>
@@ -84,7 +84,7 @@
         </div>
 
         <!-- Payment Instructions -->
-        @if ($order->payment->payment_status === 'pending')
+        @if ($order->payment->payment_method !== 'cash' && $order->payment->payment_status === 'pending')
         <div class="mt-8">
             <h2 class="font-bold text-lg">Instruksi Pembayaran</h2>
             <p class="text-gray-600">Silakan selesaikan pembayaran Anda menggunakan metode berikut:</p>

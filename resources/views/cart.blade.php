@@ -362,7 +362,7 @@
                                 subtotalDisplay.textContent = `Rp ${new Intl.NumberFormat('id-ID').format(subtotal)}`;
                             }
 
-                            // Perbarui diskon
+                            // Perbarui diskon voucher
                             const voucherDisplay = document.getElementById('voucher-display');
                             if (voucherDisplay) {
                                 voucherDisplay.textContent = `-Rp ${new Intl.NumberFormat('id-ID').format(voucherAmount)}`;
@@ -441,11 +441,17 @@
                             }
     
                             function updateCartInDatabase(itemId, quantity) {
-
                                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-                                fetch(`/cart/update/${itemId}`, {
-                                    method: 'POST',
+                                // Tampilkan loading state
+                                const updateButton = document.querySelector(`[data-item-id="${itemId}"]`);
+                                if (updateButton) {
+                                    updateButton.disabled = true;
+                                    updateButton.textContent = 'Memperbarui...';
+                                }
+
+                                fetch(`/cart/${itemId}/update`, {
+                                    method: 'PATCH',
                                     headers: {
                                         'Content-Type': 'application/json',
                                         'X-CSRF-TOKEN': csrfToken,
@@ -456,11 +462,32 @@
                                 .then(data => {
                                     if (data.success) {
                                         console.log('Cart updated successfully');
+                                        // Perbarui tampilan subtotal, voucher, dan total
+                                        updateCartSummary(data.subtotal, data.voucherAmount, data.total);
                                     } else {
                                         console.error('Failed to update cart');
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Gagal!',
+                                            text: 'Gagal memperbarui jumlah item.',
+                                        });
                                     }
                                 })
-                                .catch(error => console.error('Error:', error));
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Oops...',
+                                        text: 'Terjadi kesalahan saat memperbarui jumlah item.',
+                                    });
+                                })
+                                .finally(() => {
+                                    // Sembunyikan loading state
+                                    if (updateButton) {
+                                        updateButton.disabled = false;
+                                        updateButton.textContent = 'Perbarui';
+                                    }
+                                });
                             }
     
                             // Validasi input agar hanya angka positif

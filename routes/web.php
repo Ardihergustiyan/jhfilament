@@ -76,8 +76,7 @@ Route::get('/search-products', [ProductController::class, 'search']);
 Route::middleware('auth')->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
-    Route::post('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
-    // Route::patch('/cart/{id}/update', [CartController::class, 'update'])->name('cart.update');
+    Route::patch('/cart/{id}/update', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/cart/{id}', [CartController::class, 'delete'])->name('cart.remove');
     Route::get('/cart/item-count', [CartController::class, 'getCartItemCount'])->name('cart.itemCount');
     Route::get('/cart/subtotal', [CartController::class, 'getSubtotal'])->name('cart.subtotal');
