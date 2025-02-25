@@ -403,8 +403,11 @@ class CheckoutController extends Controller
                 // Hapus cart items setelah checkout
                 Cart::where('user_id', $user->id)->delete();
     
-                // Redirect ke halaman detail pesanan
-                return redirect()->route('order.order-detail', ['order_id' => $order->id]);
+                return redirect()->route('order.detail', [
+                    'first_name' => $order->user->first_name, // Ambil username dari relasi user
+                    'invoice_number' => $order->invoice_number, // Ambil invoice number dari order
+                ]);
+                
             }
     
             // Set your Merchant Server Key
@@ -440,6 +443,8 @@ class CheckoutController extends Controller
             );
 
             $snapToken = \Midtrans\Snap::getSnapToken($params);
+
+            $first_name = $user->first_name;
     
             // Simpan snap token ke kolom transaction_id di tabel payments
             Payment::where('order_id', $order->id)->update(['transaction_id' => $snapToken]);
@@ -457,6 +462,7 @@ class CheckoutController extends Controller
                 'snap_token' => $snapToken,
                 'order_id' => $order->id,
                 'invoice_number' => $order->invoice_number,
+                'first_name' => $first_name,
             ]);
         } catch (\Exception $e) {
             // Rollback transaction jika ada error

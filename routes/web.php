@@ -121,10 +121,10 @@ Route::get('/about', function () {
     return view('about');
 });
 
-Route::get('/order-detail/{order_id}', [OrderController::class, 'orderDetail'])
-     ->name('order.order-detail');
-Route::get('/payment/success', [OrderController::class, 'success'])->name('payment.success');
-
+Route::middleware('auth')->group(function () {
+    Route::get('/profile/{first_name}/order/{invoice_number}', [OrderController::class, 'orderDetail'])->name('order.detail');
+    Route::get('/payment/success', [OrderController::class, 'success'])->name('payment.success');
+});
 // Route::get('/profile/{first_name}', [ProfileController::class, 'show'])
 //     ->middleware('auth')
 //     ->name('profile');

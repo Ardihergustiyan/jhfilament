@@ -13,28 +13,28 @@ use Illuminate\Support\Facades\Session;
 
 class OrderController extends Controller
 {
-    public function orderDetail($order_id)
+    public function orderDetail($first_name, $invoice_number)
     {
-        // Ambil data order beserta relasinya
         $order = Order::with(['user', 'orderItems.product', 'orderItems.productVariant', 'payment', 'status'])
-                    ->find($order_id);
+                    ->where('invoice_number', $invoice_number)
+                    ->first();
 
-        // Jika order tidak ditemukan, kembalikan error 404
         if (!$order) {
             abort(404, 'Order not found');
         }
 
-        // Hitung ulang subtotal, voucherAmount, dan total
-        $subtotal = $order->orderItems->sum(function ($item) {
-            return ($item->unit_price ?? 0) * ($item->quantity ?? 0);
-        });
+        // Pastikan pengguna yang mengakses adalah pemilik pesanan
+        if (auth()->id() !== $order->user_id) {
+            abort(403, 'Unauthorized action.');
+        }
 
+        $subtotal = $order->orderItems->sum(fn($item) => ($item->unit_price ?? 0) * ($item->quantity ?? 0));
         $voucherAmount = $order->discount_amount ?? 0;
         $total = $subtotal - $voucherAmount;
 
-        // Kirim data ke view
         return view('order-detail', compact('order', 'subtotal', 'voucherAmount', 'total'));
     }
+
 
     public function success(Request $request)
     {
@@ -43,8 +43,18 @@ class OrderController extends Controller
                     ->latest()
                     ->first();
 
+        // Jika order tidak ditemukan, kembalikan error 404
+        if (!$order) {
+            abort(404, 'Order not found');
+        }
+
+        // Pastikan pengguna yang mengakses adalah pemilik pesanan
+        if (auth()->id() !== $order->user_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
         // Jika order ditemukan dan memiliki voucher_id
-        if ($order && $order->voucher_id) {
+        if ($order->voucher_id) {
             // Update status voucher menjadi 'Used'
             Voucher::where('id', $order->voucher_id)->update(['status' => 'Used']);
         }

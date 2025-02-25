@@ -401,20 +401,27 @@
                 // Tampilkan pop-up Midtrans
                 snap.pay(data.snap_token, {
                     onSuccess: function(result) {
-                        // Redirect ke halaman order detail setelah pembayaran berhasil
-                        window.location.href = "{{ route('order.order-detail', ['order_id' => ':order_id']) }}".replace(':order_id', data.order_id);
+                        window.location.href = "{{ route('order.detail', ['first_name' => ':first_name', 'invoice_number' => ':invoice_number']) }}"
+                            .replace(':first_name', data.first_name)
+                            .replace(':invoice_number', data.invoice_number);
                     },
                     onPending: function(result) {
                         alert("Menunggu pembayaran Anda!");
-                        window.location.href = "{{ route('order.order-detail', ['order_id' => ':order_id']) }}".replace(':order_id', data.order_id);
+                        window.location.href = "{{ route('order.detail', ['first_name' => ':first_name', 'invoice_number' => ':invoice_number']) }}"
+                            .replace(':first_name', data.first_name)
+                            .replace(':invoice_number', data.invoice_number);
                     },
                     onError: function(result) {
                         alert("Pembayaran gagal!");
-                        window.location.href = "{{ route('order.order-detail', ['order_id' => ':order_id']) }}".replace(':order_id', data.order_id);
+                        window.location.href = "{{ route('order.detail', ['first_name' => ':first_name', 'invoice_number' => ':invoice_number']) }}"
+                            .replace(':first_name', data.first_name)
+                            .replace(':invoice_number', data.invoice_number);
                     },
                     onClose: function() {
                         alert("Anda menutup pop-up tanpa menyelesaikan pembayaran.");
-                        window.location.href = "{{ route('order.order-detail', ['order_id' => ':order_id']) }}".replace(':order_id', data.order_id);
+                        window.location.href = "{{ route('order.detail', ['first_name' => ':first_name', 'invoice_number' => ':invoice_number']) }}"
+                            .replace(':first_name', data.first_name)
+                            .replace(':invoice_number', data.invoice_number);
                     }
                 });
             } else {
