@@ -12,6 +12,7 @@
         "laravel/sanctum": "^3.2",
         "laravel/socialite": "^5.18",
         "laravel/tinker": "^2.8",
+        "league/commonmark": "^2.6",
         "midtrans/midtrans-php": "^2.6",
         "spatie/laravel-permission": "^6.10"
     },

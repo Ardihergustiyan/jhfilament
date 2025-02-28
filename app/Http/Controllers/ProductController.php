@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use League\CommonMark\CommonMarkConverter;
 
 class ProductController extends Controller
 {
@@ -217,6 +218,10 @@ class ProductController extends Controller
         })
         ->where('products.slug', $slug)
         ->firstOrFail();
+
+        // Konversi deskripsi dari Markdown ke HTML
+        $converter = new CommonMarkConverter();
+        $product->description = $converter->convert($product->description)->getContent();
 
         // Hitung diskon untuk produk ini
         $discounts = $this->getApplicableDiscounts($product->id, $product->category_id);

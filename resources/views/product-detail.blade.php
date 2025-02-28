@@ -377,101 +377,101 @@
     <!-- deskripsi & reviews -->
     <section class="py-8 bg-inherit dark:bg-gray-900 antialiased">
         <div class="max-w-screen-xl px-4 mx-auto 2xl:px-0">
-            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
-                <h3 class="text-2xl font-semibold mb-4 flex items-center">
-                    <svg class="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Deskripsi Produk
-                </h3>
-                <div class="prose max-w-none text-gray-700">
-                    {!! $product->description !!}
-                </div>
-                <!-- Tombol "Lihat Selengkapnya" untuk deskripsi panjang -->
-                <button id="readMoreBtn" class="text-blue-500 hover:text-blue-700 mt-4 focus:outline-none">
-                    Lihat Selengkapnya
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-8 bg-inherit dark:bg-gray-900 antialiased" id="produkReview">
-    <div class="max-w-screen-xl px-4 mx-auto 2xl:px-0">
-        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
-            <h3 class="text-2xl font-semibold mb-4 flex items-center">
-                <svg class="w-6 h-6 text-yellow-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-                </svg>
-                Ulasan Produk
-            </h3>
-
-            <!-- Rating Rata-rata -->
-            <div class="flex items-center mb-6 p-4 bg-gray-50 rounded-lg">
-                <span class="text-3xl font-bold mr-2 text-gray-800">{{ number_format($product->average_rating, 1) }}</span>
-                <div class="flex items-center">
-                    @for ($i = 1; $i <= 5; $i++)
-                        @if ($i <= $product->average_rating)
-                            <svg class="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
-                            </svg>
-                        @else
-                            <svg class="w-6 h-6 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
-                            </svg>
-                        @endif
-                    @endfor
-                </div>
-                <span class="text-sm text-gray-600 ml-2">({{ $product->total_reviews ?? 0 }} ulasan)</span>
-            </div>
-
-            <!-- Daftar Ulasan -->
-            <div class="space-y-6">
-                @if ($product->reviews->isEmpty())
-                    <div class="text-center py-8">
-                        <svg class="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8"> <!-- Grid dengan 2 kolom -->
+                <!-- Deskripsi Produk (Kiri) -->
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                        <svg class="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        <p class="text-gray-600 mt-4">Belum ada ulasan untuk produk ini.</p>
+                        Deskripsi Produk
+                    </h3>
+                    <div class="prose max-w-none text-gray-700">
+                        {!! $product->description !!}
                     </div>
-                @else
-                    @foreach ($product->reviews as $review)
-                        <div class="border-b border-gray-200 pb-4 hover:bg-gray-50 transition-colors duration-200 p-4 rounded-lg">
-                            <div class="flex items-center mb-2">
-                                <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
-                                    <span class="text-gray-600 font-semibold">{{ strtoupper(substr($review->user->first_name, 0, 1)) }}</span>
-                                </div>
-                                <div>
-                                    <span class="font-semibold">{{ $review->user->first_name }}</span>
-                                    <div class="flex items-center mt-1">
-                                        @for ($i = 1; $i <= 5; $i++)
-                                            @if ($i <= $review->rating)
-                                                <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
-                                                </svg>
-                                            @else
-                                                <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
-                                                </svg>
-                                            @endif
-                                        @endfor
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="text-gray-600">{{ $review->review }}</p>
-                            <p class="text-sm text-gray-500 mt-2">{{ $review->created_at->format('d M Y') }}</p>
+                    <!-- Tombol "Lihat Selengkapnya" untuk deskripsi panjang -->
+                    <button id="readMoreBtn" class="text-blue-500 hover:text-blue-700 mt-4 focus:outline-none">
+                        Lihat Selengkapnya
+                    </button>
+                </div>
+    
+                <!-- Ulasan Produk (Kanan) -->
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300" id="produkReview">
+                    <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                        <svg class="w-6 h-6 text-yellow-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                        </svg>
+                        Ulasan Produk
+                    </h3>
+    
+                    <!-- Rating Rata-rata -->
+                    <div class="flex items-center mb-6 p-4 bg-gray-50 rounded-lg">
+                        <span class="text-3xl font-bold mr-2 text-gray-800">{{ number_format($product->average_rating, 1) }}</span>
+                        <div class="flex items-center">
+                            @for ($i = 1; $i <= 5; $i++)
+                                @if ($i <= $product->average_rating)
+                                    <svg class="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
+                                    </svg>
+                                @else
+                                    <svg class="w-6 h-6 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
+                                    </svg>
+                                @endif
+                            @endfor
                         </div>
-                    @endforeach
-                @endif
-            </div>
-
-            <!-- Tombol "Load More" untuk ulasan -->
-            <div class="mt-6 text-center">
-                <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none">
-                    Muat Lebih Banyak
-                </button>
+                        <span class="text-sm text-gray-600 ml-2">({{ $product->total_reviews ?? 0 }} ulasan)</span>
+                    </div>
+    
+                    <!-- Daftar Ulasan -->
+                    <div class="space-y-6">
+                        @if ($product->reviews->isEmpty())
+                            <div class="text-center py-8">
+                                <svg class="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <p class="text-gray-600 mt-4">Belum ada ulasan untuk produk ini.</p>
+                            </div>
+                        @else
+                            @foreach ($product->reviews as $review)
+                                <div class="border-b border-gray-200 pb-4 hover:bg-gray-50 transition-colors duration-200 p-4 rounded-lg">
+                                    <div class="flex items-center mb-2">
+                                        <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-gray-600 font-semibold">{{ strtoupper(substr($review->user->first_name, 0, 1)) }}</span>
+                                        </div>
+                                        <div>
+                                            <span class="font-semibold">{{ $review->user->first_name }}</span>
+                                            <div class="flex items-center mt-1">
+                                                @for ($i = 1; $i <= 5; $i++)
+                                                    @if ($i <= $review->rating)
+                                                        <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
+                                                        </svg>
+                                                    @else
+                                                        <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
+                                                        </svg>
+                                                    @endif
+                                                @endfor
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-600">{{ $review->review }}</p>
+                                    <p class="text-sm text-gray-500 mt-2">{{ $review->created_at->format('d M Y') }}</p>
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
+    
+                    <!-- Tombol "Load More" untuk ulasan -->
+                    <div class="mt-6 text-center">
+                        <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none">
+                            Muat Lebih Banyak
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
     </section>
   <!-- deskripsi & reviews -->
 

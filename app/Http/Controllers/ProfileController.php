@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderStatus;
@@ -564,6 +565,52 @@ class ProfileController extends Controller
             return response()->json([
                 'error' => 'Terjadi kesalahan saat memperbarui level reseller. Silakan coba lagi.'
             ], 500);
+        }
+    }
+
+    public function reorder(Order $order)
+    {
+        // Pastikan pengguna yang mengakses adalah pemilik pesanan
+        if (auth()->id() !== $order->user_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Mulai transaction
+        DB::beginTransaction();
+
+        try {
+            // Ambil item dari pesanan
+            $orderItems = $order->orderItems;
+
+            // Loop melalui setiap item dan tambahkan ke keranjang
+            foreach ($orderItems as $item) {
+                // Cek apakah item sudah ada di keranjang
+                $existingCartItem = Cart::where('user_id', auth()->id())
+                    ->where('product_id', $item->product_id)
+                    ->where('variant_id', $item->product_variant_id)
+                    ->first();
+
+                if ($existingCartItem) {
+                    $existingCartItem->increment('quantity', $item->quantity);
+                } else {
+                    Cart::create([
+                        'user_id' => auth()->id(),
+                        'product_id' => $item->product_id,
+                        'variant_id' => $item->product_variant_id,
+                        'quantity' => $item->quantity,
+                    ]);
+                }
+            }
+
+            // Commit transaction
+            DB::commit();
+
+            // Redirect ke halaman cart dengan pesan sukses
+            return redirect()->route('cart')->with('success', 'Items have been added to your cart.');
+        } catch (\Exception $e) {
+            // Rollback transaction jika ada error
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to reorder items: ' . $e->getMessage());
         }
     }
 
