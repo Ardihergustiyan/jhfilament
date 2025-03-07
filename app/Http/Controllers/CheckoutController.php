@@ -38,29 +38,38 @@ class CheckoutController extends Controller
 
         // Ambil item keranjang beserta harga reseller jika ada
         $cartItems = Cart::select(
-                'carts.*', 
-                'products.name as product_name', 
-                'products.image as product_image', 
-                'variants.main_image', 
-                'variants.color',
-                DB::raw('IFNULL(product_prices.price, products.het_price) as final_price') // Gunakan harga reseller atau het_price
+                'carts.id',
+                'carts.user_id',
+                'carts.product_id',
+                'carts.variant_id',
+                'carts.quantity',
+                'carts.created_at',
+                'carts.updated_at',
+                'products.name as product_name',
+                'products.image as product_image',
+                DB::raw('MAX(variants.main_image) as main_image'),
+                DB::raw('IFNULL(product_prices.price, products.het_price) as final_price')
             )
             ->join('products', 'carts.product_id', '=', 'products.id')
             ->leftJoin('product_prices', function ($join) use ($resellerLevelId) {
                 $join->on('products.id', '=', 'product_prices.product_id')
                     ->where('product_prices.reseller_level_id', '=', $resellerLevelId);
             })
-            ->leftJoinSub(
-                DB::table('product_variants')
-                    ->select('id as variant_id', 'color', DB::raw('JSON_UNQUOTE(JSON_EXTRACT(image, "$[0]")) as main_image'))
-                    ->groupBy('id'),
-                'variants',
+            ->leftJoin(DB::raw('(SELECT id AS variant_id, JSON_UNQUOTE(JSON_EXTRACT(image, "$[0]")) AS main_image FROM product_variants) AS variants'), 'carts.variant_id', '=', 'variants.variant_id')
+            ->where('carts.user_id', '=', $user->id)
+            ->groupBy(
+                'carts.id',
+                'carts.user_id',
+                'carts.product_id',
                 'carts.variant_id',
-                '=',
-                'variants.variant_id'
+                'carts.quantity',
+                'carts.created_at',
+                'carts.updated_at',
+                'products.name',
+                'products.image',
+                'product_prices.price',
+                'products.het_price'
             )
-            ->whereIn('carts.id', $cartItemIds) // Ambil hanya cart items yang dipilih
-            ->where('carts.user_id', $user->id)
             ->get();
 
         // Hitung diskon untuk setiap item di keranjang
@@ -95,7 +104,7 @@ class CheckoutController extends Controller
         foreach ($cartItems as $item) {
             $itemDetails[] = [
                 'id' => $item->product_id,
-                'price' => $item->discounted_price ?? $item->final_price,
+                'price' => intval(round($item->discounted_price ?? $item->final_price)),
                 'quantity' => $item->quantity,
                 'name' => $item->product_name,
             ];
@@ -120,6 +129,14 @@ class CheckoutController extends Controller
         }
 
         $snapToken = \Midtrans\Snap::getSnapToken($params);
+        
+        // try {
+        //     $snapToken = \Midtrans\Snap::getSnapToken($params);
+        //     dd($snapToken); // Debugging dengan dump and die
+        // } catch (\Exception $e) {
+        //     dd($e->getMessage()); // Debugging error jika terjadi
+        //     return redirect()->back()->with('error', 'Terjadi kesalahan saat memproses pembayaran.');
+        // }
 
         return view('checkout', compact('cartItems', 'subtotal', 'voucherAmount', 'total', 'snapToken'));
     }
@@ -421,7 +438,7 @@ class CheckoutController extends Controller
             foreach ($cartItems as $item) {
                 $itemDetails[] = [
                     'id' => $item->product_id, // ID produk
-                    'price' => $item->discounted_price ?? $item->final_price, // Harga per item
+                    'price' => intval(round($item->discounted_price ?? $item->final_price)), // Harga per item
                     'quantity' => $item->quantity, // Jumlah item
                     'name' => $item->product_name, // Nama produk
                 ];

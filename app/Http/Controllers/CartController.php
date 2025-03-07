@@ -24,28 +24,40 @@ class CartController extends Controller
 
         // Mengambil item keranjang beserta produk, gambar utama, dan gambar produk
         $cartItems = Cart::select(
-                'carts.*', 
-                'products.name as product_name', 
-                'products.image as product_image', 
-                'variants.main_image',
-                DB::raw('IFNULL(product_prices.price, products.het_price) as final_price') // Gunakan harga reseller atau het_price
+                'carts.id',
+                'carts.user_id',
+                'carts.product_id',
+                'carts.variant_id',
+                'carts.quantity',
+                'carts.created_at',
+                'carts.updated_at',
+                'products.name as product_name',
+                'products.image as product_image',
+                DB::raw('MAX(variants.main_image) as main_image'),
+                DB::raw('IFNULL(product_prices.price, products.het_price) as final_price')
             )
             ->join('products', 'carts.product_id', '=', 'products.id')
             ->leftJoin('product_prices', function ($join) use ($resellerLevelId) {
                 $join->on('products.id', '=', 'product_prices.product_id')
                     ->where('product_prices.reseller_level_id', '=', $resellerLevelId);
             })
-            ->leftJoinSub(
-                DB::table('product_variants')
-                    ->select('id as variant_id', DB::raw('JSON_UNQUOTE(JSON_EXTRACT(image, "$[0]")) as main_image'))
-                    ->groupBy('id'),
-                'variants',
+            ->leftJoin(DB::raw('(SELECT id AS variant_id, JSON_UNQUOTE(JSON_EXTRACT(image, "$[0]")) AS main_image FROM product_variants) AS variants'), 'carts.variant_id', '=', 'variants.variant_id')
+            ->where('carts.user_id', '=', $user->id)
+            ->groupBy(
+                'carts.id',
+                'carts.user_id',
+                'carts.product_id',
                 'carts.variant_id',
-                '=',
-                'variants.variant_id'
+                'carts.quantity',
+                'carts.created_at',
+                'carts.updated_at',
+                'products.name',
+                'products.image',
+                'product_prices.price',
+                'products.het_price'
             )
-            ->where('carts.user_id', $user->id)
             ->get();
+
 
         // Hitung harga diskon untuk setiap item di keranjang
         foreach ($cartItems as $cartItem) {

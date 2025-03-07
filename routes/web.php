@@ -136,15 +136,15 @@ Route::middleware('auth')->group(function () {
 // Route::post('/profile/upload', [ProfileController::class, 'upload'])->name('profile.upload');
 
 
-Route::post('/midtrans-callback', [CheckoutController::class, 'handleMidtransCallback']);
-Route::post('/midtrans/notification', [CheckoutController::class,'handleMidtransNotification']);
+Route::post('/midtrans-callback', [MidtransController::class, 'handleMidtransCallback']);
+Route::post('/midtrans/notification', [MidtransController::class,'handleMidtransNotification']);
 
 Route::get('auth/redirect', [SocialiteController::class, 'redirect']);
 
 Route::get('/auth/google/callback', [SocialiteController::class, 'callback']);
 
-Route::get('/home', [HomeController::class, 'index'])
-    ->middleware(['auth', 'verified']);
+// Route::get('/home', [HomeController::class, 'index'])
+//     ->middleware(['auth', 'verified']);
 
 
 // Tampilan notifikasi verifikasi email
