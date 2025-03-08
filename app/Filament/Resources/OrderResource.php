@@ -45,7 +45,7 @@ class OrderResource extends Resource
     protected static ?int $navigationSort = 6;
     protected static ?string $navigationGroup = 'Order Management';
 
-   
+
 
     public static function canEdit($record): bool
     {
@@ -59,57 +59,57 @@ class OrderResource extends Resource
             ->schema([
                 Section::make('Informasi Pesanan')->schema([
                     Select::make('user_id')
-                    ->label('Nama Pengguna')
-                    ->relationship('user', 'first_name') 
-                    ->required()
-                    ->columnSpan(6),
-                
-                // Select::make('status_id')
-                //     ->relationship('status', 'name')
-                //     ->label('Order Status'),
+                        ->label('Nama Pengguna')
+                        ->relationship('user', 'first_name')
+                        ->required()
+                        ->columnSpan(6),
+
+                    // Select::make('status_id')
+                    //     ->relationship('status', 'name')
+                    //     ->label('Order Status'),
 
                     ToggleButtons::make('status_id')
-                                ->default(1)
-                                ->label('Status Order')
-                                ->inline()
-                                ->columnSpan(6)
-                                
-                                ->required()->options([
-                                    '1' => 'Diproses',
-                                    '2' => 'Siap Diambil',
-                                    '3' => 'Selesai',
-                                    '4' => 'Dibatalkan'
-                                ])
-                                ->colors([
-                                    '1' => 'warning',
-                                    '2' => 'info',
-                                    '3' => 'success',
-                                    '4' => 'danger'
-                                ])
-                                ->icons([
-                                    '1' => 'heroicon-m-truck',
-                                    '2' => 'heroicon-m-check-badge',
-                                    '3' => 'heroicon-m-clipboard-document-check',
-                                    '4' => 'heroicon-m-x-circle'
-                                ]),
-                        
+                        ->default(1)
+                        ->label('Status Order')
+                        ->inline()
+                        ->columnSpan(6)
+
+                        ->required()->options([
+                                '1' => 'Diproses',
+                                '2' => 'Siap Diambil',
+                                '3' => 'Selesai',
+                                '4' => 'Dibatalkan'
+                            ])
+                        ->colors([
+                            '1' => 'warning',
+                            '2' => 'info',
+                            '3' => 'success',
+                            '4' => 'danger'
+                        ])
+                        ->icons([
+                            '1' => 'heroicon-m-truck',
+                            '2' => 'heroicon-m-check-badge',
+                            '3' => 'heroicon-m-clipboard-document-check',
+                            '4' => 'heroicon-m-x-circle'
+                        ]),
+
 
                     Select::make('discount_id')
                         ->relationship('discount', 'name')
                         ->label('Diskon')
                         ->nullable()
                         ->columnSpan(6),
-                        
+
                     Select::make('voucher_id')
-                        ->relationship('voucher', 'code') 
+                        ->relationship('voucher', 'code')
                         ->label('Kupon / Voucher')
                         ->searchable()
                         ->nullable()
                         ->preload()
                         ->columnSpan(6),
-                    
-                    
-                        Forms\Components\Fieldset::make('Payment Details')
+
+
+                    Forms\Components\Fieldset::make('Payment Details')
                         ->label('Detail Pembayaran')
                         ->relationship('payment') // Pastikan relasi ini ada
                         ->schema([
@@ -138,9 +138,9 @@ class OrderResource extends Resource
                                 ->nullable(),
                         ])
                         ->columns(12)
-                        ->visible(fn ($record) => $record && $record->payment), // Hanya tampilkan jika relasi payment ada
+                        ->visible(fn($record) => $record && $record->payment), // Hanya tampilkan jika relasi payment ada
                 ]),
-                
+
                 Section::make('Daftar Pesanan')->schema([
                     Repeater::make('Items')
                         ->relationship()
@@ -161,13 +161,13 @@ class OrderResource extends Resource
                                 ->afterStateUpdated(function ($state, Set $set, Get $get) {
                                     $product = Product::find($state);
                                     $unitPrice = $product?->base_price ?? 0;
-                            
+
                                     $set('unit_price', $unitPrice);
                                     $quantity = $get('quantity') ?? 1; // Ambil jumlah default 1 jika belum diatur
                                     $set('total_price', $unitPrice * $quantity); // Hitung total_price
                                 }),
-                            
-                            Select::make('product_variant_ids') 
+
+                            Select::make('product_variant_ids')
                                 ->relationship('productVariants', 'color') // Relasi dengan warna produk
                                 ->options(function (callable $get) {
                                     $productId = $get('product_id'); // Ambil product_id dari state form
@@ -185,8 +185,8 @@ class OrderResource extends Resource
                                 ->columnSpan(3)
                                 ->placeholder('Pilih warna produk')
                                 ->reactive(),
-                            
-                        
+
+
                             TextInput::make('quantity')
                                 ->label('Jumlah')
                                 ->numeric()
@@ -203,7 +203,8 @@ class OrderResource extends Resource
 
                             placeholder::make('unit_price')
                                 ->label('Harga Satuan')
-                                ->content(fn (Get $get) => 
+                                ->content(
+                                    fn(Get $get) =>
                                     Number::currency($get('unit_price') ?? 0, 'IDR') // Format sebagai mata uang IDR
                                 )
                                 ->columnSpan(2),
@@ -212,7 +213,8 @@ class OrderResource extends Resource
 
                             placeholder::make('total_price')
                                 ->label('Harga Total')
-                                ->content(fn (Get $get) => 
+                                ->content(
+                                    fn(Get $get) =>
                                     Number::currency($get('total_price') ?? 0, 'IDR') // Format sebagai mata uang IDR
                                 )
                                 ->columnSpan(2),
@@ -221,42 +223,42 @@ class OrderResource extends Resource
                         ])
                         ->columns(12)
                         ->addActionLabel('Tambah Pesanan'),
-                        
-                        Placeholder::make('grand_total_placeholder')
-                            ->label('Total Harga Keseluruhan')
-                        
-                            ->content(function (Get $get, Set $set) {
-                                $total = 0;
-                                if (!$repeaters = $get('Items')) {
-                                    return Number::currency($total, 'IDR');
-                                }
-                    
-                                foreach ($repeaters as $key => $repeater) {
-                                    $total += $repeater['total_price'] ?? 0; // Use `total_price` directly from the repeater state
-                                }
-                                $set('total_price', $total);
+
+                    Placeholder::make('grand_total_placeholder')
+                        ->label('Total Harga Keseluruhan')
+
+                        ->content(function (Get $get, Set $set) {
+                            $total = 0;
+                            if (!$repeaters = $get('Items')) {
                                 return Number::currency($total, 'IDR');
+                            }
+
+                            foreach ($repeaters as $key => $repeater) {
+                                $total += $repeater['total_price'] ?? 0; // Use `total_price` directly from the repeater state
+                            }
+                            $set('total_price', $total);
+                            return Number::currency($total, 'IDR');
                         }),
-                
+
                     Hidden::make('total_price')
                         ->default(0)
-                        ->dehydrated()         
+                        ->dehydrated()
                 ])
-        ]);
+            ]);
     }
 
-    
+
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                
+
                 Tables\Columns\TextColumn::make('user.first_name')
                     ->label('nama')
                     ->sortable()
                     ->searchable(),
-                
+
                 Tables\Columns\TextColumn::make('total_price')
                     ->label('Total Pembelian')
                     ->money('IDR'),
@@ -264,7 +266,7 @@ class OrderResource extends Resource
                     ->label('metode pembayaran')
                     ->searchable()
                     ->sortable(),
-                    
+
                 Tables\Columns\SelectColumn::make('payment.payment_status') // Akses melalui relasi payment
                     ->label('Ubah Status Pembayaran')
                     ->options([
@@ -274,20 +276,20 @@ class OrderResource extends Resource
                     ->rules(['required', 'in:dibayar,pending']) // Validasi input
                     ->placeholder('Pilih Status'),
                 Tables\Columns\SelectColumn::make('status_id')
-                ->label('status pesanan')
-                ->options([
-                    '1' => 'Diproses',
-                    '2' => 'Siap Diambil',
-                    '3' => 'Selesai',
-                    '4' => 'Dibatalkan'
-                ])
-                ->disableOptionWhen(function ($value, $record) {
-                    // Nonaktifkan opsi "Selesai" jika status pembayaran bukan "dibayar"
-                    return $value == '3' && $record->payment->payment_status != 'dibayar';
-                })
-                ->searchable()
-                ->sortable(),
-                    
+                    ->label('status pesanan')
+                    ->options([
+                        '1' => 'Diproses',
+                        '2' => 'Siap Diambil',
+                        '3' => 'Selesai',
+                        '4' => 'Dibatalkan'
+                    ])
+                    ->disableOptionWhen(function ($value, $record) {
+                        // Nonaktifkan opsi "Selesai" jika status pembayaran bukan "dibayar"
+                        return $value == '3' && $record->payment->payment_status != 'dibayar';
+                    })
+                    ->searchable()
+                    ->sortable(),
+
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -331,11 +333,11 @@ class OrderResource extends Resource
                         return $query
                             ->when(
                                 $data['month'],
-                                fn (Builder $query, $month): Builder => $query->whereMonth('created_at', $month),
+                                fn(Builder $query, $month): Builder => $query->whereMonth('created_at', $month),
                             )
                             ->when(
                                 $data['year'],
-                                fn (Builder $query, $year): Builder => $query->whereYear('created_at', $year),
+                                fn(Builder $query, $year): Builder => $query->whereYear('created_at', $year),
                             );
                     }),
             ])
@@ -365,7 +367,7 @@ class OrderResource extends Resource
     public static function getNavigationBadgeColor(): string|array|null
     {
         // Hitung jumlah data dengan status_id 1 atau 2
-    $count = static::getModel('status')::whereIn('status_id', [1, 2])->count();
+        $count = static::getModel('status')::whereIn('status_id', [1, 2])->count();
 
         // Kondisi untuk menentukan warna
         if ($count > 0) {

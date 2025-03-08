@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 class PenjualanChart extends ChartWidget
 {
     use InteractsWithPageFilters;
-
+    protected static ?int $sort = 2;
     protected static ?string $heading = 'Chart Penjualan';
 
     protected function getData(): array
@@ -26,8 +26,11 @@ class PenjualanChart extends ChartWidget
             })
             ->when($filters['updated_at'] ?? null, function ($query, $updatedAt) {
                 return $query->whereDate('updated_at', '<=', Carbon::parse($updatedAt));
+            }, function ($query) { // Jika filter kosong, default ke tahun ini
+                return $query->whereYear('created_at', Carbon::now()->year);
             })
             ->get();
+
 
         // Hitung jumlah order per bulan
         $orderCounts = $orders->groupBy(function ($order) {

@@ -12,6 +12,7 @@ class CustomerChart extends ChartWidget
     use InteractsWithPageFilters; // Menggunakan filter dari Dashboard
 
     protected static ?string $heading = 'Customer Growth';
+    protected static ?int $sort = 3;
 
     protected function getData(): array
     {
@@ -24,6 +25,8 @@ class CustomerChart extends ChartWidget
             })
             ->when($filters['updated_at'] ?? null, function ($query, $updatedAt) {
                 return $query->whereDate('created_at', '<=', Carbon::parse($updatedAt));
+            }, function ($query) { // Jika filter kosong, default ke tahun ini
+                return $query->whereYear('created_at', Carbon::now()->year);
             })
             ->get();
 

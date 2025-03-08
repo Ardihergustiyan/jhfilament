@@ -33,7 +33,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->passwordReset(RequestPasswordReset::class)
             ->emailVerification()
-            ->brandLogo(fn () => view('filament.admin.logo'))
+            ->brandLogo(fn() => view('filament.admin.logo'))
             ->colors([
                 'primary' => Color::hex('#F37199'),
             ])
@@ -42,9 +42,9 @@ class AdminPanelProvider extends PanelProvider
             ->pages([])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                    // Widgets\AccountWidget::class,
-                PenjualanChart::class,
-                PenjualanChart::class,
+                // Widgets\AccountWidget::class,
+                // PenjualanChart::class,
+                // PenjualanChart::class,
 
                 // Widgets\FilamentInfoWidget::class,
             ])
