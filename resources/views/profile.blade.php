@@ -128,6 +128,7 @@
             </p>
         </div>
       
+        @role('Reseller')
         <div>
           <svg class="mb-2 h-8 w-8 text-gray-400 dark:text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -147,6 +148,7 @@
           </p>
         
         </div>
+        @endrole
       </div>
     
       
@@ -238,6 +240,7 @@
           </div>
 
           <!-- Progress Bar Section -->
+          @role('Reseller')
           <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700">
             <div class="flex flex-col space-y-4">
               <!-- Judul -->
@@ -283,6 +286,7 @@
               </div>
             </div>
           </div>
+          @endrole
         </div>
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -421,26 +425,10 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById('userRole').textContent = 'Reseller'; // Update teks role
-                        alert(data.success); // Notifikasi sukses
-            
-                        // Sembunyikan tombol Join Reseller
-                        document.getElementById('joinResellerButton').style.display = 'none';
-            
-                        // Tampilkan tombol Upgrade Reseller
-                        let upgradeButton = document.getElementById('upgradeResellerButton');
-                        if (upgradeButton) {
-                            upgradeButton.style.display = 'inline-flex';
-                        } else {
-                            // Jika tidak ada di awal, buat tombolnya
-                            let newButton = document.createElement('button');
-                            newButton.id = 'upgradeResellerButton';
-                            newButton.textContent = 'Upgrade Reseller';
-                            newButton.className = 'inline-flex w-full items-center justify-center  rounded-lg bg-green-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-800 sm:w-auto';
-                            document.getElementById('joinResellerButton').after(newButton);
-                        }
+                        alert(data.success); // Tampilkan notifikasi sukses
+                        window.location.reload(); // Refresh halaman
                     } else {
-                        alert(data.error || 'Gagal mengubah peran.');
+                        alert(data.error || 'Gagal mengubah peran.'); // Tampilkan pesan error
                     }
                 })
                 .catch(error => console.error('Error:', error));

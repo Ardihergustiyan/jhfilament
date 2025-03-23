@@ -10,9 +10,11 @@ use App\Models\Payment;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Voucher;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class CheckoutController extends Controller
 {
@@ -252,16 +254,30 @@ class CheckoutController extends Controller
     
         try {
             // Validasi input
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'payment-method' => 'required|string',
                 'delivery-method' => 'required|string',
-                'phone_number' => 'required|string|max:15',
+                'phone_number' => [
+                    'required',
+                    'string',
+                    'regex:/^(\+62|62|0)[0-9]{9,13}$/', // Hanya angka, mulai dengan +62, 62, atau 0, panjang 10-14 digit
+                ],
                 'notes' => 'nullable|string',
             ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator) // Kirim error validasi ke view
+                    ->withInput(); // Pertahankan input yang sudah diisi
+            }
     
             // Ambil user yang sedang login
             $user = auth()->user();
             $resellerLevelId = $user->reseller_level_id ?? null;
+    
+            // Update phone_number di tabel users
+            $user->phone_number = $request->input('phone_number');
+            $user->save();
     
             // Ambil item keranjang beserta harga reseller jika ada
             $cartItems = Cart::select(
@@ -377,7 +393,7 @@ class CheckoutController extends Controller
                 'shipping_method' => $request->input('delivery-method'),
                 'notes' => $request->input('notes'),
                 'voucher_id' => $voucherId,
-                'invoice_number' => $invoiceNumber, 
+                'invoice_number' => $invoiceNumber,
             ]);
     
             // Simpan order items dan kurangi stok
@@ -424,7 +440,6 @@ class CheckoutController extends Controller
                     'first_name' => $order->user->first_name, // Ambil username dari relasi user
                     'invoice_number' => $order->invoice_number, // Ambil invoice number dari order
                 ]);
-                
             }
     
             // Set your Merchant Server Key
@@ -453,19 +468,24 @@ class CheckoutController extends Controller
                     'first_name' => $user->first_name,
                     'last_name' => $user->last_name,
                     'email' => $user->email,
-                    'phone' => $user->phone_number,
+                    'phone' => $user->phone_number, // Gunakan phone_number dari user yang sudah diupdate
                 ),
                 'item_details' => $itemDetails,
                 'custom_field1' => $order->invoice_number,
             );
-
+    
             $snapToken = \Midtrans\Snap::getSnapToken($params);
-
+    
             $first_name = $user->first_name;
     
             // Simpan snap token ke kolom transaction_id di tabel payments
             Payment::where('order_id', $order->id)->update(['transaction_id' => $snapToken]);
-    
+            
+            // Jika transaction_id tidak null, ubah payment_status menjadi 'dibayar'
+            Payment::where('order_id', $order->id)
+                ->whereNotNull('transaction_id')
+                ->update(['payment_status' => 'dibayar']);
+                
             // Hapus cart items setelah checkout
             Cart::where('user_id', $user->id)->delete();
     

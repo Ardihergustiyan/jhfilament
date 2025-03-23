@@ -142,8 +142,8 @@ class ProfileController extends Controller
             }
         // Daftar level dan syarat minimal pembelian untuk upgrade
         $levelRequirements = [
-            1 => 500000,    // Ruby
-            2 => 1000000,   // Bronze
+            1 => 1000000,    // Ruby
+            2 => 5000000,   // Bronze
             3 => 10000000,  // Silver
             4 => 50000000,  // Gold
         ];
@@ -193,41 +193,18 @@ class ProfileController extends Controller
             return response()->json(['error' => 'User not authenticated'], 401);
         }
 
-        // Ambil level reseller dari user yang login
-        $resellerLevelId = $user->reseller_level_id ?? null;
-
-        // Awal & akhir bulan ini
+        // Ambil total belanja bulan ini
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
-
-        // Ambil semua pesanan selesai bulan ini dengan harga diskon
-        $ordersThisMonth = Order::where('user_id', $user->id)
+        $totalSpentThisMonth = Order::where('user_id', $user->id)
             ->where('status_id', 3)
             ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->with(['orderItems' => function ($query) use ($resellerLevelId) {
-                $query->select('order_items.*', 'products.het_price')
-                    ->join('products', 'order_items.product_id', '=', 'products.id')
-                    ->leftJoin('product_prices', function ($join) use ($resellerLevelId) {
-                        $join->on('products.id', '=', 'product_prices.product_id')
-                            ->where('product_prices.reseller_level_id', '=', $resellerLevelId);
-                    })
-                    ->selectRaw('IFNULL(product_prices.price, products.het_price) as final_price');
-            }])
-            ->get();
-
-        // Hitung total belanja bulan ini dengan harga diskon
-        $totalSpentThisMonth = $ordersThisMonth->sum(function ($order) {
-            return $order->orderItems->sum(function ($item) {
-                $discounts = $this->getApplicableDiscounts($item->product_id, $item->product->category_id);
-                $discountedPrice = $this->calculateDiscountedPrice($item->final_price, $discounts);
-                return $discountedPrice * $item->quantity;
-            });
-        });
+            ->sum('total_price');
 
         // Daftar level & syarat upgrade
         $levelRequirements = [
-            1 => 500000,    // Ruby
-            2 => 1000000,   // Bronze
+            1 => 1000000,    // Ruby
+            2 => 5000000,   // Bronze
             3 => 10000000,  // Silver
             4 => 50000000,  // Gold
         ];
@@ -238,14 +215,13 @@ class ProfileController extends Controller
         // Cari level berikutnya
         $currentLevelId = $user->reseller_level_id;
         $nextLevelRequirement = $levelRequirements[$currentLevelId] ?? null;
-
+        
         // Ambil nama level berikutnya dari database
         $nextLevel = \App\Models\ResellerLevel::where('id', '>', $currentLevelId)
             ->orderBy('id')
             ->first();
         $nextLevelName = $nextLevel->name ?? 'Gold';
 
-        // Jika user sudah di level tertinggi
         if (!$nextLevelRequirement) {
             return response()->json([
                 'error' => 'Anda sudah di level tertinggi',
@@ -260,7 +236,7 @@ class ProfileController extends Controller
 
         // Hitung progress dalam persen, maksimal 100%
         $progressPercentage = min(100, ($totalSpentThisMonth / $nextLevelRequirement) * 100);
-
+        
         // Hitung sisa yang perlu dibelanjakan untuk naik level berikutnya
         $remainingAmount = max(0, $nextLevelRequirement - $totalSpentThisMonth);
         $readyForUpgrade = $totalSpentThisMonth >= $nextLevelRequirement; // Cek apakah sudah memenuhi syarat
@@ -277,75 +253,6 @@ class ProfileController extends Controller
             'daysLeftInMonth' => $daysLeftInMonth,
         ]);
     }
-
-    // public function getProgressData()
-    // {
-    //     $user = Auth::user();
-
-    //     if (!$user) {
-    //         return response()->json(['error' => 'User not authenticated'], 401);
-    //     }
-
-    //     // Ambil total belanja bulan ini
-    //     $startOfMonth = Carbon::now()->startOfMonth();
-    //     $endOfMonth = Carbon::now()->endOfMonth();
-    //     $totalSpentThisMonth = Order::where('user_id', $user->id)
-    //         ->where('status_id', 3)
-    //         ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-    //         ->sum('total_price');
-
-    //     // Daftar level & syarat upgrade
-    //     $levelRequirements = [
-    //         1 => 500000,    // Ruby
-    //         2 => 1000000,   // Bronze
-    //         3 => 10000000,  // Silver
-    //         4 => 50000000,  // Gold
-    //     ];
-
-    //     // Ambil nama level saat ini dari database
-    //     $currentLevelName = $user->resellerLevel->name ?? 'Regular User';
-
-    //     // Cari level berikutnya
-    //     $currentLevelId = $user->reseller_level_id;
-    //     $nextLevelRequirement = $levelRequirements[$currentLevelId] ?? null;
-        
-    //     // Ambil nama level berikutnya dari database
-    //     $nextLevel = \App\Models\ResellerLevel::where('id', '>', $currentLevelId)
-    //         ->orderBy('id')
-    //         ->first();
-    //     $nextLevelName = $nextLevel->name ?? 'Gold';
-
-    //     if (!$nextLevelRequirement) {
-    //         return response()->json([
-    //             'error' => 'Anda sudah di level tertinggi',
-    //             'progressPercentage' => number_format(100, 2),
-    //             'currentSpent' => number_format($totalSpentThisMonth, 0, ',', '.'),
-    //             'target' => number_format($totalSpentThisMonth, 0, ',', '.'), // Target sudah tercapai
-    //             'remainingAmount' => '0',
-    //             'currentLevel' => $currentLevelName,
-    //             'nextLevel' => $nextLevelName,
-    //         ], 400);
-    //     }
-
-    //     // Hitung progress dalam persen, maksimal 100%
-    //     $progressPercentage = min(100, ($totalSpentThisMonth / $nextLevelRequirement) * 100);
-        
-    //     // Hitung sisa yang perlu dibelanjakan untuk naik level berikutnya
-    //     $remainingAmount = max(0, $nextLevelRequirement - $totalSpentThisMonth);
-    //     $readyForUpgrade = $totalSpentThisMonth >= $nextLevelRequirement; // Cek apakah sudah memenuhi syarat
-    //     $daysLeftInMonth = Carbon::now()->diffInDays($endOfMonth) + 1; // +1 agar hari ini juga dihitung
-
-    //     return response()->json([
-    //         'progressPercentage' => number_format($progressPercentage, 2),
-    //         'currentSpent' => number_format($totalSpentThisMonth, 0, ',', '.'),
-    //         'target' => number_format($nextLevelRequirement, 0, ',', '.'),
-    //         'remainingAmount' => number_format($remainingAmount, 0, ',', '.'),
-    //         'currentLevel' => $currentLevelName,
-    //         'nextLevel' => $nextLevelName,
-    //         'readyForUpgrade' => $readyForUpgrade, // Kirim status siap naik level
-    //         'daysLeftInMonth' => $daysLeftInMonth,
-    //     ]);
-    // }
 
     
 
@@ -421,75 +328,40 @@ class ProfileController extends Controller
     public function join(Request $request)
     {
         $user = Auth::user();
-
+    
         if (!$user) {
             return response()->json(['error' => 'User not authenticated'], 401);
         }
-
+    
+        // Hitung total pembelian user dalam bulan ini
+        $startOfMonth = Carbon::now()->startOfMonth(); // Awal bulan ini
+        $endOfMonth = Carbon::now()->endOfMonth(); // Akhir bulan ini
+    
+        $totalSpentThisMonth = Order::where('user_id', $user->id)
+            ->where('status_id', 3) // Status selesai
+            ->whereBetween('created_at', [$startOfMonth, $endOfMonth]) // Filter bulan ini
+            ->sum('total_price');
+    
+        // Cek apakah total pembelian bulan ini minimal Rp 500.000
+        if ($totalSpentThisMonth < 500000) {
+            return response()->json(['error' => 'Anda harus memiliki minimal pembelian Rp 500.000 dalam bulan ini untuk bergabung sebagai Reseller.'], 400);
+        }
+    
         // Ambil role Reseller dari database
         $resellerRole = Role::where('name', 'Reseller')->first();
-
+    
         if (!$resellerRole) {
             return response()->json(['error' => 'Role Reseller tidak ditemukan'], 404);
         }
-
+    
         // Sync role agar hanya menjadi Reseller (menghapus role lain jika ada)
         $user->roles()->sync([$resellerRole->id]);
-
+    
         // Update reseller_level_id ke 1
         $user->update(['reseller_level_id' => 1]);
-
+    
         return response()->json(['success' => 'Anda sekarang menjadi Reseller']);
     }
-
-    // public function upgradeReseller(Request $request)
-    // {
-    //     $user = Auth::user();
-
-    //     if (!$user) {
-    //         return response()->json(['error' => 'User not authenticated'], 401);
-    //     }
-
-    //     // Daftar level dan syarat minimal pembelian
-    //     $levelRequirements = [
-    //         1 => 500000,    // Ruby
-    //         2 => 1000000,   // Bronze
-    //         3 => 10000000,  // Silver
-    //         4 => 50000000,  // Gold
-    //     ];
-
-    //     $currentLevelId = $user->reseller_level_id;
-
-    //     // Cek apakah ada level berikutnya
-    //     if (!isset($levelRequirements[$currentLevelId])) {
-    //         return response()->json(['error' => 'Anda sudah mencapai level tertinggi'], 400);
-    //     }
-
-    //     $requiredAmount = $levelRequirements[$currentLevelId];
-
-    //     // Hitung total pembelian bulan ini
-    //     $startOfMonth = Carbon::now()->startOfMonth();
-    //     $endOfMonth = Carbon::now()->endOfMonth();
-    //     $totalSpentThisMonth = Order::where('user_id', $user->id)
-    //         ->where('status_id', 3)
-    //         ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-    //         ->sum('total_price');
-
-    //     if ($totalSpentThisMonth < $requiredAmount) {
-    //         return response()->json(['error' => 'Anda perlu belanja minimal ' . number_format($requiredAmount, 0, ',', '.') . ' untuk naik level.'], 400);
-    //     }
-
-    //     // Naikkan level reseller
-    //     $newLevelId = $currentLevelId + 1;
-    //     $user->update(['reseller_level_id' => $newLevelId]);
-
-    //     $newLevelName = ResellerLevel::find($newLevelId)->name;
-
-    //     return response()->json([
-    //         'success' => 'Anda telah naik ke level ' . $newLevelName,
-    //         'newLevel' => $newLevelName
-    //     ]);
-    // }
 
     public function upgradeReseller(Request $request)
     {
@@ -501,8 +373,8 @@ class ProfileController extends Controller
 
         // Daftar level dan syarat minimal pembelian
         $levelRequirements = [
-            1 => 500000,    // Ruby
-            2 => 1000000,   // Bronze
+            1 => 1000000,    // Ruby
+            2 => 5000000,   // Bronze
             3 => 10000000,  // Silver
             4 => 50000000,  // Gold
         ];
@@ -516,56 +388,28 @@ class ProfileController extends Controller
 
         $requiredAmount = $levelRequirements[$currentLevelId];
 
-        // Hitung total pembelian bulan ini dengan harga diskon
+        // Hitung total pembelian bulan ini
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
-
-        $ordersThisMonth = Order::where('user_id', $user->id)
+        $totalSpentThisMonth = Order::where('user_id', $user->id)
             ->where('status_id', 3)
             ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->with(['orderItems' => function ($query) use ($user) {
-                $query->select('order_items.*', 'products.het_price')
-                    ->join('products', 'order_items.product_id', '=', 'products.id')
-                    ->leftJoin('product_prices', function ($join) use ($user) {
-                        $join->on('products.id', '=', 'product_prices.product_id')
-                            ->where('product_prices.reseller_level_id', '=', $user->reseller_level_id);
-                    })
-                    ->selectRaw('IFNULL(product_prices.price, products.het_price) as final_price');
-            }])
-            ->get();
+            ->sum('total_price');
 
-        $totalSpentThisMonth = $ordersThisMonth->sum(function ($order) {
-            return $order->orderItems->sum(function ($item) {
-                $discounts = $this->getApplicableDiscounts($item->product_id, $item->product->category_id);
-                $discountedPrice = $this->calculateDiscountedPrice($item->final_price, $discounts);
-                return $discountedPrice * $item->quantity;
-            });
-        });
-
-        // Cek apakah total belanja memenuhi syarat untuk naik level
         if ($totalSpentThisMonth < $requiredAmount) {
-            return response()->json([
-                'error' => 'Anda perlu belanja minimal ' . number_format($requiredAmount, 0, ',', '.') . ' untuk naik level.'
-            ], 400);
+            return response()->json(['error' => 'Anda perlu belanja minimal ' . number_format($requiredAmount, 0, ',', '.') . ' untuk naik level.'], 400);
         }
 
         // Naikkan level reseller
         $newLevelId = $currentLevelId + 1;
+        $user->update(['reseller_level_id' => $newLevelId]);
 
-        try {
-            $user->update(['reseller_level_id' => $newLevelId]);
+        $newLevelName = ResellerLevel::find($newLevelId)->name;
 
-            $newLevelName = ResellerLevel::find($newLevelId)->name;
-
-            return response()->json([
-                'success' => 'Anda telah naik ke level ' . $newLevelName,
-                'newLevel' => $newLevelName
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Terjadi kesalahan saat memperbarui level reseller. Silakan coba lagi.'
-            ], 500);
-        }
+        return response()->json([
+            'success' => 'Anda telah naik ke level ' . $newLevelName,
+            'newLevel' => $newLevelName
+        ]);
     }
 
     public function reorder(Order $order)
@@ -614,48 +458,14 @@ class ProfileController extends Controller
         }
     }
 
-    // public function downgradeReseller()
-    // {
-    //     $users = User::whereNotNull('reseller_level_id')->get();
-
-    //     // Daftar syarat minimal pembelian per level
-    //     $levelRequirements = [
-    //         2 => 500000,    // Bronze -> Ruby
-    //         3 => 1000000,   // Silver -> Bronze
-    //         4 => 10000000,  // Gold -> Silver
-    //     ];
-
-    //     foreach ($users as $user) {
-    //         $currentLevelId = $user->reseller_level_id;
-
-    //         if (!isset($levelRequirements[$currentLevelId])) {
-    //             continue; // Jika tidak ada aturan, lewati user ini
-    //         }
-
-    //         $requiredAmount = $levelRequirements[$currentLevelId];
-
-    //         // Hitung total pembelian bulan lalu
-    //         $startOfLastMonth = Carbon::now()->subMonth()->startOfMonth();
-    //         $endOfLastMonth = Carbon::now()->subMonth()->endOfMonth();
-    //         $totalSpentLastMonth = Order::where('user_id', $user->id)
-    //             ->where('status_id', 3)
-    //             ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
-    //             ->sum('total_price');
-
-    //         // Jika tidak memenuhi syarat, turunkan level
-    //         if ($totalSpentLastMonth < $requiredAmount) {
-    //             $user->update(['reseller_level_id' => $currentLevelId - 1]);
-    //         }
-    //     }
-    // }
-
     public function downgradeReseller()
     {
         // Daftar syarat minimal pembelian per level
         $levelRequirements = [
-            2 => 500000,    // Bronze -> Ruby
-            3 => 1000000,   // Silver -> Bronze
-            4 => 10000000,  // Gold -> Silver
+            1 => 1000000,    // Ruby
+            2 => 5000000,   // Bronze
+            3 => 10000000,  // Silver
+            4 => 50000000,  // Gold
         ];
 
         // Proses user dalam chunk untuk optimasi memori

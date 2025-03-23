@@ -57,11 +57,15 @@
                 </label>
                 <input type="text" id="phone-input" name="phone_number"
                     class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
-                    value="{{ Auth::user()->phone_number ? Auth::user()->phone_number : '' }}"
+                    value="{{ old('phone_number', Auth::user()->phone_number) }}"
                     placeholder="Masukkan nomor HP Anda" 
                     required />
-              </div>
-
+                
+                <!-- Tampilkan pesan error validasi -->
+                @error('phone_number')
+                    <span class="text-sm text-red-600">{{ $message }}</span>
+                @enderror
+            </div>
               <div>
                 <label for="email" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"> Email </label>
                 <input type="text" id="email" name="email" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
@@ -310,43 +314,6 @@
   
 </section>
 
-<script>
-  document.querySelector('form').addEventListener('submit', function (event) {
-      const phoneInput = document.getElementById('phone-input');
-      const paymentMethod = document.querySelector('input[name="payment-method"]:checked');
-      const deliveryMethod = document.querySelector('input[name="delivery-method"]:checked');
-
-      if (!phoneInput.value) {
-          Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Nomor HP wajib diisi!',
-          });
-          event.preventDefault();
-          return;
-      }
-
-      if (!paymentMethod) {
-          Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Pilih metode pembayaran!',
-          });
-          event.preventDefault();
-          return;
-      }
-
-      if (!deliveryMethod) {
-          Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Pilih metode pengiriman!',
-          });
-          event.preventDefault();
-          return;
-      }
-  });
-  </script>
 
 <footer class="bg-white shadow-md">
   <div class="container mx-auto px-4 py-5 text-center">
